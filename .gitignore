@@ -1,0 +1,56 @@
+# SO
+.DS_Store
+Thumbs.db
+
+# Java / JVM
+*.class
+*.log
+hs_err_pid*
+replay_pid*
+hotspot.log
+
+# Empaquetados locales (si no publicas artefactos)
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+!libs/*.jar
+
+# Maven
+target/
+.mvn/timing.properties
+# ¡NO ignores el wrapper!
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# Gradle
+.gradle/
+build/
+# ¡NO ignores el wrapper!
+!gradlew
+!gradlew.bat
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# VS Code (ignorar todo; luego ver Opción B si quieres compartir config)
+.vscode/
+
+# Eclipse (por si aparece)
+.project
+.classpath
+.settings/
+
+# Varias
+bin/
+dist/
+
