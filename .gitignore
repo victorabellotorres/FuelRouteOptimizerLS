@@ -9,15 +9,6 @@ hs_err_pid*
 replay_pid*
 hotspot.log
 
-# Empaquetados locales (si no publicas artefactos)
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-
-!libs/*.jar
-
 # Maven
 target/
 .mvn/timing.properties
