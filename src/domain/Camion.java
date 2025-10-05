@@ -7,9 +7,8 @@ import main.*;
 public class Camion {
 
     // Límites para todos los camiones
-    public static final int MAX_VIAJES = 5;
-    public static final int MAX_KM = 640;
-    public static final int NUM_PETTICIONES = 100;
+    public static int MAX_VIAJES = Constants.MAX_VIAJES;
+    public static int MAX_KM = Constants.MAX_KM;
 
     // Atributos
     private int kmRestantes;
