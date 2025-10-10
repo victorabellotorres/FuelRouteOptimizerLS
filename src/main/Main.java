@@ -27,11 +27,11 @@ public class Main {
         CentrosDistribucion centrosDistribucion = new CentrosDistribucion(Constants.NUM_CENTROSDISTRIBUCION, Constants.CAMIONES_POR_CENTRO, Constants.SEED);
 
         //State estadoInicial = buscarEstadoInicial();
-        State estado = new State(100, 100);
+        P1Board estado = new P1Board(100, 100);
 
         // Create the Problem object
         Problem p = new  Problem(estado,
-                new P1SuccesorFunction(),
+                new P1SuccesorFunctionHC(),
                 new P1GoalTest(),
                 new P1HeuristicFunction());
 

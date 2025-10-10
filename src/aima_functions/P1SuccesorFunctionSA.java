@@ -7,13 +7,13 @@ import java.util.List;
 
 import domain.*;
 
-public class P1SuccesorFunction implements SuccessorFunction {
+public class P1SuccesorFunctionSA implements SuccessorFunction {
 
     @Override
     public List getSuccessors(Object o) {
         ArrayList retval = new ArrayList();
 
-        State s = (State) o;
+        P1Board s = (P1Board) o;
 
         // afegir aqui els successors
 

@@ -13,7 +13,7 @@ public class Camion {
     // Atributos
     private int kmRestantes;
     private int viajesRestantes;
-    private Pair[] viajes;
+    private Pair[] viajes; // viaje = {idPeticion1, idPeticion2}
 
     // Constructores
     /**
