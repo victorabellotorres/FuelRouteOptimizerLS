@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"IA.Gasolina","l":"CentrosDistribucion"},{"p":"IA.Gasolina","l":"Distribucion"},{"p":"IA.Gasolina","l":"Gasolinera"},{"p":"IA.Gasolina","l":"Gasolineras"},{"p":"IA.Gasolina","l":"Test"}];updateSearchResults();
