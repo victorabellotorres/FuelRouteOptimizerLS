@@ -11,6 +11,7 @@ public class Camion {
     public static int MAX_KM = Constants.MAX_KM;
 
     // Atributos
+    private Pair posicion; // (x,y) del camión
     private int kmRestantes;
     private int viajesRestantes;
     private Pair[] viajes; // viaje = {idPeticion1, idPeticion2}
@@ -19,7 +20,7 @@ public class Camion {
     /**
      * Constructora por defecto.
      */
-    public Camion() {
+    public Camion(Pair posicion) {
         viajes = new Pair[MAX_VIAJES];
         for (int i = 0; i < MAX_VIAJES; ++i) {
             viajes[i] = new Pair(-1, -1);
@@ -34,10 +35,20 @@ public class Camion {
     public Camion(Camion camion) {
         this.kmRestantes = camion.kmRestantes;
         this.viajesRestantes = camion.viajesRestantes;
-        this.viajes = camion.getViajes();
+
+        this.viajes = new Pair[MAX_VIAJES];
+        for (int i = 0; i < MAX_VIAJES; ++i) {
+            this.viajes[i] = new Pair(camion.viajes[i].first, camion.viajes[i].second);
+        }
     }
 
     // Getters y Setters
+    public Pair getPosicion() {
+        return posicion;
+    }
+    public void setPosicion(Pair posicion) {
+        this.posicion = posicion;
+    }
     public int getKmRestantes() {
         return kmRestantes;
     }
@@ -62,6 +73,13 @@ public class Camion {
             --viajesRestantes;
             kmRestantes -= km;
         }
+    }
+
+    public int getKmUsados() {
+        return MAX_KM - kmRestantes;
+    }
+    public int getViajesUsados() {
+        return MAX_VIAJES - viajesRestantes;
     }
 
 }
