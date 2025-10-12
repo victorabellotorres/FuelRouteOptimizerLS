@@ -21,6 +21,7 @@ public class Camion {
      * Constructora por defecto.
      */
     public Camion(Pair posicion) {
+        this.posicion = posicion;
         viajes = new Pair[MAX_VIAJES];
         for (int i = 0; i < MAX_VIAJES; ++i) {
             viajes[i] = new Pair(-1, -1);
@@ -81,5 +82,8 @@ public class Camion {
     public int getViajesUsados() {
         return MAX_VIAJES - viajesRestantes;
     }
+
+    // Otros métodos
+
 
 }

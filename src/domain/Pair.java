@@ -18,4 +18,12 @@ public final class Pair {
         int r = Integer.hashCode(first);
         return 31 * r + Integer.hashCode(second);
     }
+
+    // Métodos auxiliares
+
+    // Cambia el valor actual, si existe, por el update
+    public void swap(int actual, int update) {
+        if (first == actual) first = update;
+        else if (second == actual) second = update;
+    }
 }

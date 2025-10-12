@@ -101,13 +101,149 @@ public class P1Board {
         if (peticiones[i].getIdCamion() == -1 && peticiones[j].getIdCamion() == -1) return false; // Si alguna de las dos peticiones no tiene un camion asignado, no se puede hacer el swap
 
         if (peticiones[i].getIdCamion() != -1 && peticiones[j].getIdCamion() != -1) {
-            //TODO
+            if (peticiones[i].getIdCamion() == peticiones[j].getIdCamion()) {
+                int distancia = camiones[peticiones[i].getIdCamion()].getKmUsados();
+                distancia -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
+                distancia -= getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
+
+                camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(i, j);
+
+                camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(j, i);
+
+                int tempIdViaje_i = peticiones[i].getIdViaje();
+                peticiones[i].setIdViaje(peticiones[j].getIdViaje());
+                peticiones[j].setIdViaje(tempIdViaje_i);
+
+                int nuevaDistancia = getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
+                nuevaDistancia += getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
+
+                distancia += nuevaDistancia;
+                if (distancia > Camion.MAX_KM) {
+                    // Deshacemos el swap
+                    camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
+                    camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(i, j);
+
+                    // Deshacemos los cambios en las peticiones
+                    peticiones[j].setIdViaje(peticiones[i].getIdViaje());
+                    peticiones[i].setIdViaje(tempIdViaje_i);
+
+                    return false;
+                }
+                camiones[peticiones[i].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia);
+            } else {
+                // Si son de diferentes camiones
+                int distancia1 = camiones[peticiones[i].getIdCamion()].getKmUsados();
+                int distancia2 = camiones[peticiones[j].getIdCamion()].getKmUsados();
+
+                distancia1 -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
+                distancia2 -= getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
+
+                camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(i, j);
+
+                camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(j, i);
+
+                // Actualizamos los datos de las peticioness
+                int tempIdCamion_i = peticiones[i].getIdCamion();
+                peticiones[i].setIdCamion(peticiones[j].getIdCamion());
+                peticiones[j].setIdCamion(tempIdCamion_i);
+
+                int tempIdViaje_i = peticiones[i].getIdViaje();
+                peticiones[i].setIdViaje(peticiones[j].getIdViaje());
+                peticiones[j].setIdViaje(tempIdViaje_i);
+
+                int nuevaDistancia1 = getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
+                int nuevaDistancia2 = getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
+
+                distancia1 += nuevaDistancia1;
+                distancia2 += nuevaDistancia2;
+
+                if (distancia1 > Camion.MAX_KM || distancia2 > Camion.MAX_KM) {
+                    // Deshacemos el swap
+                    camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
+                    camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(i, j);
+
+                    // Deshacemos los cambios en las peticiones
+                    peticiones[j].setIdCamion(peticiones[i].getIdCamion());
+                    peticiones[i].setIdCamion(tempIdCamion_i);
+
+                    peticiones[j].setIdViaje(peticiones[i].getIdViaje());
+                    peticiones[i].setIdViaje(tempIdViaje_i);
+
+
+                    return false;
+                }
+                camiones[peticiones[i].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia2);
+                camiones[peticiones[j].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia1);
+
+            }
         } else if (peticiones[i].getIdCamion() != -1) {
-            //TODO
+            // Si solo una de las dos peticiones (i en este caso) tiene un camion asignado
+            int distancia = camiones[peticiones[i].getIdCamion()].getKmUsados();
+            distancia -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
+
+            camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(i, j);
+
+            peticiones[j].setIdCamion(peticiones[i].getIdCamion());
+            peticiones[j].setIdViaje(peticiones[i].getIdViaje());
+            peticiones[i].setIdCamion(-1);
+            peticiones[i].setIdViaje(-1);
+            int nuevaDistancia = getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
+
+            distancia += nuevaDistancia;
+            if (distancia > Camion.MAX_KM) {
+                // Deshacemos el swap
+                camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(j, i);
+
+                peticiones[i].setIdCamion(peticiones[j].getIdCamion());
+                peticiones[i].setIdViaje(peticiones[j].getIdViaje());
+                peticiones[j].setIdCamion(-1);
+                peticiones[j].setIdViaje(-1);
+                return false;
+            }
+            camiones[peticiones[j].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia);
         } else {
-            //TODO
+            // Si solo una de las dos peticiones (j en este caso) tiene un camion asignado
+            int distancia = camiones[peticiones[j].getIdCamion()].getKmUsados();
+            distancia -= getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
+
+            camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(j, i);
+
+            peticiones[i].setIdCamion(peticiones[j].getIdCamion());
+            peticiones[i].setIdViaje(peticiones[j].getIdViaje());
+            peticiones[j].setIdCamion(-1);
+            peticiones[j].setIdViaje(-1);
+            int nuevaDistancia = getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
+
+            distancia += nuevaDistancia;
+            if (distancia > Camion.MAX_KM) {
+                // Deshacemos el swap
+                camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
+
+                peticiones[j].setIdCamion(peticiones[i].getIdCamion());
+                peticiones[j].setIdViaje(peticiones[i].getIdViaje());
+                peticiones[i].setIdCamion(-1);
+                peticiones[i].setIdViaje(-1);
+                return false;
+            }
+            camiones[peticiones[i].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia);
         }
-        
+
         return true;
+    }
+
+    // Métodos auxiliares
+
+    private int getDistanciaViaje(int idCamion, int idViaje) {
+        if (idViaje < 0 || idViaje >= Camion.MAX_VIAJES) return 0;
+        Pair v = camiones[idCamion].getViajes()[idViaje];
+
+        if (v.first == -1 && v.second == -1) return 0;
+        else if (v.first != -1 && v.second == -1) return 2 * P1Board.distanciasCamionesGasolineras[idCamion][peticiones[v.first].getGasolinera()];
+        else if (v.first == -1 && v.second != -1) return 2 * P1Board.distanciasCamionesGasolineras[idCamion][peticiones[v.second].getGasolinera()];
+        else {
+            int idGasolinera1 = peticiones[v.first].getGasolinera();
+            int idGasolinera2 = peticiones[v.second].getGasolinera();
+            return P1Board.distanciasCamionesGasolineras[idCamion][idGasolinera1] + P1Board.distanciasGasolineras[idGasolinera1][idGasolinera2] + P1Board.distanciasCamionesGasolineras[idCamion][idGasolinera2];
+        }
     }
 }

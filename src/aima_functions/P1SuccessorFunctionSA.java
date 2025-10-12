@@ -7,7 +7,7 @@ import java.util.List;
 
 import domain.*;
 
-public class P1SuccesorFunctionSA implements SuccessorFunction {
+public class P1SuccessorFunctionSA implements SuccessorFunction {
 
     @Override
     public List getSuccessors(Object o) {

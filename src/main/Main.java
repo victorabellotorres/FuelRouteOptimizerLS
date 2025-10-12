@@ -5,6 +5,7 @@ import aima.search.framework.GraphSearch;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
+import aima.search.informed.HillClimbingSearch;
 import aima.search.informed.AStarSearch;
 
 import java.util.Iterator;
@@ -26,29 +27,76 @@ public class Main {
         Gasolineras gasolineras = new Gasolineras(Constants.NUM_GASOLINERAS, Constants.SEED);
         CentrosDistribucion centrosDistribucion = new CentrosDistribucion(Constants.NUM_CENTROSDISTRIBUCION, Constants.CAMIONES_POR_CENTRO, Constants.SEED);
 
-        //State estadoInicial = buscarEstadoInicial();
-        P1Board estado = new P1Board(100, 100);
+        // ==============================
+        // 2️⃣ Crear el estado inicial
+        // ==============================
+        P1Board estadoInicial = null;
+        switch (Constants.ALGORITMO_ESTADO_INICIAL) {
+            case 3 -> {
+                System.out.println("Generando estado inicial GREEDY...");
+                //estadoInicial = InitialBoardGenerator.greedySolution(gasolineras, centros);
+            }
+            case 2 -> {
+                System.out.println("No implementado aun");
+                //estadoInicial = InitialBoardGenerator.randomSolution(gasolineras, centros);
+            }
+            default -> {
+                System.out.println("Generando estado inicial ORDENADO...");
+                estadoInicial = InitialBoardGenerator.SolucionAsignacionOrdenada(gasolineras, centrosDistribucion); // placeholder
+            }
+        }
 
-        // Create the Problem object
-        Problem p = new  Problem(estado,
-                new P1SuccesorFunctionHC(),
+        System.out.println("Estado inicial generado.");
+        System.out.println(estadoInicial);
+
+
+        P1SuccessorFunction sf = null;
+        Search search = new HillClimbingSearch();
+        P1HeuristicFunction hf = new P1HeuristicFunction();
+
+        if (Constants.ALGORITMO_BUSQUEDA == 2) {
+            System.out.println("Usando Simulated Annealing...");
+            System.out.println("No implementado aun");
+
+//            sf = new P1SuccessorFunctionSA(); // versión aleatoria
+//            // parámetros SA: iteraciones totales, pasos por temp, k, lambda
+//            search = new SimulatedAnnealingSearch(20000, 100, 5, 0.001);
+        } else {
+            System.out.println("Usando Hill Climbing...");
+            sf = new P1SuccessorFunction(); // genera todos los sucesores
+            search = new HillClimbingSearch();
+        }
+
+        // ==============================
+        // 4️⃣ Crear el problema
+        // ==============================
+        Problem problem = new Problem(
+                estadoInicial,
+                sf,
                 new P1GoalTest(),
-                new P1HeuristicFunction());
+                hf
+        );
 
-        // Instantiate the search algorithm
-        // AStarSearch(new GraphSearch()) or IterativeDeepeningAStarSearch()
-        Search alg = new AStarSearch(new GraphSearch());
+        // ==============================
+        // 5️⃣ Ejecutar búsqueda
+        // ==============================
+        long start = System.currentTimeMillis();
+        SearchAgent agent = new SearchAgent(problem, search);
+        long end = System.currentTimeMillis();
 
-        // Instantiate the SearchAgent object
-        SearchAgent agent = new SearchAgent(p, alg);
+        // ==============================
+        // 6️⃣ Mostrar resultados
+        // ==============================
+        P1Board finalState = (P1Board) search.getGoalState();
 
-        // We print the results of the search
-        System.out.println();
-        printActions(agent.getActions());
+        System.out.println("\n========= RESULTADOS =========");
+        System.out.println("Tiempo total: " + (end - start) + " ms");
+        System.out.println("Valor heurístico final: " + hf.getHeuristicValue(finalState));
+        System.out.println(finalState);
+
+        System.out.println("\n-- Instrumentación --");
         printInstrumentation(agent.getInstrumentation());
-
-        // You can access also to the goal state using the
-        // method getGoalState of class Search
+        System.out.println("===============================");
 
     }
 
@@ -59,7 +107,7 @@ public class Main {
         System.out.print("1. Máximo de viajes por camión: " + Constants.MAX_VIAJES);
         System.out.print("2. Máximo de kilómetros por camión: " + Constants.MAX_KM);
 
-        System.out.print("Selecciona el Estado Inicial [1: Aleatorio(default), 2: Por orden, 3: Greedy]");
+        System.out.print("Selecciona el Estado Inicial [1: Por orden(default), 2: Aleatorio, 3: Greedy]");
         int option = sc.nextInt();
         if (option < 1 || option > 3) {
             System.out.println("Opción no válida. Usando valor por defecto (1: Aleatorio).");
@@ -67,15 +115,26 @@ public class Main {
             Constants.ALGORITMO_ESTADO_INICIAL = option;
         }
 
+        System.out.print("Selecciona el Algoritmo de Busqueda [1: Hill Climbing(default), 2: Simulated Annealing]");
+        option = sc.nextInt();
+        if (option < 1 || option > 2) {
+            System.out.println("Opción no válida. Usando valor por defecto (1: Hill Climbing).");
+        } else {
+            Constants.ALGORITMO_ESTADO_INICIAL = option;
+        }
 
-       System.out.print("Selecciona la Seed: [Default: 123456]: ");
+       System.out.print("Selecciona la Seed: [R = random, Default: 1234]: ");
        sc.nextLine(); // Consumir el salto de línea pendiente
        String input = sc.nextLine();
        if (!input.isEmpty()) {
            try {
-               Constants.SEED = Integer.parseInt(input);
+               if (input.equalsIgnoreCase("R")) {
+                   Constants.SEED = (int) System.currentTimeMillis();
+               } else {
+                   Constants.SEED = Integer.parseInt(input);
+               }
            } catch (NumberFormatException e) {
-               System.out.println("Entrada no válida. Usando valor por defecto (123456).");
+               System.out.println("Entrada no válida. Usando valor por defecto (1234).");
            }
        }
 
