@@ -14,11 +14,11 @@ public class P1HeuristicFunction implements HeuristicFunction {
         double beneficio = 0.0;
         double coste = 0.0;
 
-        // Beneficio: peticiones atendidas hoy
+        // Beneficio: peticiones atendidas hoy (solo las que tienen camion asignado)
         Peticion[] peticiones = estado.getPeticiones();
         for (Peticion p : peticiones) {
-            double porcentaje = 100.0 - Math.pow(2.0, p.getDias());
-            if (porcentaje < 0) porcentaje = 0;
+            if (p.getIdCamion() == -1) continue;
+            double porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
             beneficio += VALOR_DEP * (porcentaje / 100.0);
         }
 
