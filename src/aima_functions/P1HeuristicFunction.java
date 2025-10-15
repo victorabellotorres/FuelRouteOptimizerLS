@@ -17,8 +17,12 @@ public class P1HeuristicFunction implements HeuristicFunction {
         // Beneficio: peticiones atendidas hoy (solo las que tienen camion asignado)
         Peticion[] peticiones = estado.getPeticiones();
         for (Peticion p : peticiones) {
-            if (p.getIdCamion() == -1) continue;
-            double porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
+            double porcentaje;
+            // Si la peticion no tiene camion asignado, el beneficio es el que se obtiene si asumimos que se atiende un día después.
+            if (p.getIdCamion() == -1) porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias()+1)));
+            else {
+                porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
+            }
             beneficio += VALOR_DEP * (porcentaje / 100.0);
         }
 
