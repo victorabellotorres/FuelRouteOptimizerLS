@@ -18,13 +18,10 @@ public class InitialBoardGenerator {
         //Recorremos las gasolineras y guardamos las peticioens en un vector de peticiones
         Peticion[] peticiones = new Peticion[numPeticiones];
         int count = 0;
-        // Deterministic per-seed assignment: compute days as a hash of (seed, petitionIndex)
         for (int i = 0; i < gasolineras.size(); i++) {
             Gasolinera gasolinera = gasolineras.get(i);
             for (int j = 0; j < gasolinera.getPeticiones().size(); j++) {
-                // dias in {0,1,2,3} deterministically derived from seed and petition index
-                int dias = Math.abs(java.util.Objects.hash(main.Constants.SEED, count)) % 4;
-                peticiones[count] = new Peticion(i, dias);
+                peticiones[count] = new Peticion(i, gasolinera.getPeticiones().get(j));
                 ++count;
             }
         }
