@@ -98,10 +98,10 @@ public class P1Board {
         if (i < 0 || i >= peticiones.length || j < 0 || j >= peticiones.length || i == j) return false;
 
         // Hacemos el swap comprobando el límite de kilometros restantes, no hace falta comprobar el límite de viajes porque no se añadiran viajes al hacer un intercambio
-        if (peticiones[i].getIdCamion() == -1 && peticiones[j].getIdCamion() == -1) return false; // Si alguna de las dos peticiones no tiene un camion asignado, no se puede hacer el swap
+        if (peticiones[i].getIdCamion() == -1 && peticiones[j].getIdCamion() == -1) return false; // Si alguna de las dos peticiones no tiene un camion asignado, no importa hacer el swap
 
-        if (peticiones[i].getIdCamion() != -1 && peticiones[j].getIdCamion() != -1) {
-            if (peticiones[i].getIdCamion() == peticiones[j].getIdCamion()) {
+        if (peticiones[i].getIdCamion() != -1 && peticiones[j].getIdCamion() != -1) { // Si las dos peticiones tienen un camion asignado
+            if (peticiones[i].getIdCamion() == peticiones[j].getIdCamion()) { // Si son del mismo camion
                 int distancia = camiones[peticiones[i].getIdCamion()].getKmUsados();
                 distancia -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
                 distancia -= getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
@@ -176,8 +176,7 @@ public class P1Board {
                 camiones[peticiones[j].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia1);
 
             }
-        } else if (peticiones[i].getIdCamion() != -1) {
-            // Si solo una de las dos peticiones (i en este caso) tiene un camion asignado
+        } else if (peticiones[i].getIdCamion() != -1) { // Si solo una de las dos peticiones (i en este caso) tiene un camion asignado
             int distancia = camiones[peticiones[i].getIdCamion()].getKmUsados();
             distancia -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
 
