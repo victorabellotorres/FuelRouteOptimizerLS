@@ -98,10 +98,10 @@ public class P1Board {
         if (i < 0 || i >= peticiones.length || j < 0 || j >= peticiones.length || i == j) return false;
 
         // Hacemos el swap comprobando el límite de kilometros restantes, no hace falta comprobar el límite de viajes porque no se añadiran viajes al hacer un intercambio
-        if (peticiones[i].getIdCamion() == -1 && peticiones[j].getIdCamion() == -1) return false; // Si alguna de las dos peticiones no tiene un camion asignado, no se puede hacer el swap
+        if (peticiones[i].getIdCamion() == -1 && peticiones[j].getIdCamion() == -1) return false; // Si alguna de las dos peticiones no tiene un camion asignado, no importa hacer el swap
 
-        if (peticiones[i].getIdCamion() != -1 && peticiones[j].getIdCamion() != -1) {
-            if (peticiones[i].getIdCamion() == peticiones[j].getIdCamion()) {
+        if (peticiones[i].getIdCamion() != -1 && peticiones[j].getIdCamion() != -1) { // Si las dos peticiones tienen un camion asignado
+            if (peticiones[i].getIdCamion() == peticiones[j].getIdCamion()) { // Si son del mismo camion
                 int distancia = camiones[peticiones[i].getIdCamion()].getKmUsados();
                 distancia -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
                 distancia -= getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
@@ -176,8 +176,7 @@ public class P1Board {
                 camiones[peticiones[j].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia1);
 
             }
-        } else if (peticiones[i].getIdCamion() != -1) {
-            // Si solo una de las dos peticiones (i en este caso) tiene un camion asignado
+        } else if (peticiones[i].getIdCamion() != -1) { // Si solo una de las dos peticiones (i en este caso) tiene un camion asignado
             int distancia = camiones[peticiones[i].getIdCamion()].getKmUsados();
             distancia -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
 
@@ -232,6 +231,63 @@ public class P1Board {
     }
 
     // Métodos auxiliares
+
+    // Devuelve true si el estado es una solución que cumple con los requisitos:
+    //      1. No supera el máximo de kilometros
+    //      2. No supera el máximo de viajes
+    // Devuelve el primer error que encuentra, no todos.
+    public boolean esSolucion(String errorMsg) {
+        for (int i = 0; i < camiones.length; ++i) {
+            int sumaDistancias = 0;
+            int viajes = 0;
+            // Comprobamos la restricción de kilometros y viajes recorriendo el vector y no mirando directamente los km restantes y miramos que cuadren.
+            for (int j = 0; j < Camion.MAX_VIAJES; ++j) {
+                int distanciaViaje = getDistanciaViaje(i, j);
+                if (distanciaViaje == 0) continue; // Si el viaje no tiene peticiones asignadas, no hace falta seguir comprobando
+
+                ++viajes;
+
+                if (distanciaViaje != camiones[i].getKmUsados()) {
+                    errorMsg = "Error: El camión " + i + " tiene un error en el cálculo de kilómetros usados.";
+                }
+                sumaDistancias += distanciaViaje;
+            }
+            if (sumaDistancias != camiones[i].getKmUsados()) {
+                errorMsg = "Error: El camión " + i + " tiene un error en el cálculo de kilómetros usados.";
+                return false;
+            }
+            if (sumaDistancias > Camion.MAX_KM) {
+                errorMsg = "Error: El camión " + i + " supera el máximo de kilómetros.";
+                return false;
+            }
+            if (viajes != camiones[i].getViajesUsados()) {
+                errorMsg = "Error: El camión " + i + " tiene un error en el cálculo de viajes usados.";
+                return false;
+            }
+            if (viajes > Camion.MAX_VIAJES) {
+                errorMsg = "Error: El camión " + i + " supera el máximo de viajes.";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public int peticionesAssignadas() {
+        int count = 0;
+        for (Peticion p : peticiones) {
+            if (p.getIdCamion() != -1) count++;
+        }
+        return count;
+    }
+
+    public int camionesUsados() {
+        int count = 0;
+        for (Camion c : camiones) {
+            if (c.getViajesUsados() != 0) count++;
+        }
+        return count;
+    }
 
     private int getDistanciaViaje(int idCamion, int idViaje) {
         if (idViaje < 0 || idViaje >= Camion.MAX_VIAJES) return 0;

@@ -6,6 +6,7 @@ import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
+import aima.search.informed.SimulatedAnnealingSearch;
 import aima.search.informed.AStarSearch;
 
 import java.util.Iterator;
@@ -20,52 +21,32 @@ public class Main {
 
     public static void main(String[] args) throws Exception{
 
-        // Definir las constantes del problema
-        defineConstants();
-
-        // Crear el estado inicial
-        Gasolineras gasolineras = new Gasolineras(Constants.NUM_GASOLINERAS, Constants.SEED);
-        CentrosDistribucion centrosDistribucion = new CentrosDistribucion(Constants.NUM_CENTROSDISTRIBUCION, Constants.CAMIONES_POR_CENTRO, Constants.SEED);
+        // ==============================
+        // 1. Definir constantes
+        // ==============================
+        definirConstants();
 
         // ==============================
-        // 2️⃣ Crear el estado inicial
+        // 2️. Crear el estado inicial
         // ==============================
-        P1Board estadoInicial = null;
-        switch (Constants.ALGORITMO_ESTADO_INICIAL) {
-            case 3 -> {
-                System.out.println("Generando estado inicial GREEDY...");
-                //estadoInicial = InitialBoardGenerator.greedySolution(gasolineras, centros);
-            }
-            case 2 -> {
-                System.out.println("No implementado aun");
-                //estadoInicial = InitialBoardGenerator.randomSolution(gasolineras, centros);
-            }
-            default -> {
-                System.out.println("Generando estado inicial ORDENADO...");
-                estadoInicial = InitialBoardGenerator.SolucionAsignacionOrdenada(gasolineras, centrosDistribucion); // placeholder
-            }
-        }
+        P1Board estadoInicial = crearEstadoInicial();
 
-        System.out.println("Estado inicial generado.");
-        System.out.println(estadoInicial);
-
-
-        P1SuccessorFunction sf = null;
+        // ==============================
+        // 3️. Definir funciones de búsqueda
+        // ==============================
+        aima.search.framework.SuccessorFunction sf = new P1SuccessorFunction();
         Search search = new HillClimbingSearch();
         P1HeuristicFunction hf = new P1HeuristicFunction();
 
-        if (Constants.ALGORITMO_BUSQUEDA == 2) {
-            System.out.println("Usando Simulated Annealing...");
-            System.out.println("No implementado aun");
+        definirFunciones(sf, search, hf);
 
-//            sf = new P1SuccessorFunctionSA(); // versión aleatoria
-//            // parámetros SA: iteraciones totales, pasos por temp, k, lambda
-//            search = new SimulatedAnnealingSearch(20000, 100, 5, 0.001);
-        } else {
-            System.out.println("Usando Hill Climbing...");
-            sf = new P1SuccessorFunction(); // genera todos los sucesores
-            search = new HillClimbingSearch();
-        }
+
+        // =============================
+        // Imprimir estadísticas del estado inicial
+        // =============================
+        System.out.println("\n--- Estadísticas del estado inicial ---");
+        imprimirEstadisticasEstado(estadoInicial, hf);
+
 
         // ==============================
         // 4️⃣ Crear el problema
@@ -78,21 +59,25 @@ public class Main {
         );
 
         // ==============================
-        // 5️⃣ Ejecutar búsqueda
+        // 5️. Ejecutar búsqueda
         // ==============================
         long start = System.currentTimeMillis();
         SearchAgent agent = new SearchAgent(problem, search);
         long end = System.currentTimeMillis();
 
         // ==============================
-        // 6️⃣ Mostrar resultados
+        // 6️. Mostrar resultados
         // ==============================
         P1Board finalState = (P1Board) search.getGoalState();
 
         System.out.println("\n========= RESULTADOS =========");
         System.out.println("Tiempo total: " + (end - start) + " ms");
-        System.out.println("Valor heurístico final: " + hf.getHeuristicValue(finalState));
-        System.out.println(finalState);
+
+        System.out.println("Estadísticas del estado final:");
+        imprimirEstadisticasEstado(finalState, hf);
+
+        // nodos expandidos:
+        System.out.println("Nodos expandidos: " + search.getMetrics().get("nodesExpanded"));
 
         System.out.println("\n-- Instrumentación --");
         printInstrumentation(agent.getInstrumentation());
@@ -100,32 +85,108 @@ public class Main {
 
     }
 
-    public static void defineConstants() {
+    public static P1Board crearEstadoInicial() {
+        // Crear el estado inicial
+        Gasolineras gasolineras = new Gasolineras(Constants.NUM_GASOLINERAS, Constants.SEED);
+        CentrosDistribucion centrosDistribucion = new CentrosDistribucion(Constants.NUM_CENTROSDISTRIBUCION, Constants.CAMIONES_POR_CENTRO, Constants.SEED);
+
+        P1Board estadoInicial = null;
+        switch (Constants.ALGORITMO_ESTADO_INICIAL) {
+            case 2 -> {
+                System.out.println("Generando estado inicial ALEATORIO...");
+                estadoInicial = InitialBoardGenerator.SolucionAsignacionAleatoria(gasolineras, centrosDistribucion);
+            }
+            case 3 -> {
+                System.out.println("Generando estado inicial GREEDY (QUADRANTS)...");
+                estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gasolineras, centrosDistribucion);
+            }
+            case 4 -> {
+                System.out.println("Generando estado inicial GREEDY (EIXOS)...");
+                estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyEjes(gasolineras, centrosDistribucion);
+            }
+            default -> {
+                System.out.println("Generando estado inicial ORDENADO...");
+                estadoInicial = InitialBoardGenerator.SolucionAsignacionOrdenada(gasolineras, centrosDistribucion); // placeholder
+            }
+        }
+
+        System.out.println("Estado inicial generado.");
+        System.out.println(estadoInicial);
+
+        return estadoInicial;
+    }
+
+    public static void definirFunciones(aima.search.framework.SuccessorFunction sf, Search search, P1HeuristicFunction hf) {
+         // Definir las funciones de búsqueda según el algoritmo seleccionado
+        if (Constants.ALGORITMO_BUSQUEDA == 2) {
+            System.out.println("Usando Simulated Annealing...");
+            // Use SA-specific successor and conservative default parameters
+            sf = new P1SuccessorFunctionSA(Constants.SA_NEIGHBORS);
+            // iterations, stepsPerTemp, k, lambda
+            // Increase iterations to allow up to ~20001 node expansions
+            search = new SimulatedAnnealingSearch(Constants.SA_STEPS, Constants.SA_STITER, Constants.SA_K, Constants.SA_LAMBDA);
+        } else {
+            System.out.println("Usando Hill Climbing...");
+            sf = new P1SuccessorFunction(); // genera todos los sucesores
+            search = new HillClimbingSearch();
+        }
+
+        hf = new P1HeuristicFunction();
+    }
+
+    public static void imprimirEstadisticasEstado(P1Board estado, P1HeuristicFunction hf) {
+        double initialHeur = hf.getHeuristicValue(estado);
+
+        String errorMsg = "";
+        boolean esSolucion = estado.esSolucion(errorMsg);
+        if (esSolucion) {
+            System.out.println("El estado es una solución válida.");
+        } else {
+            System.out.println("El estado NO es una solución válida. Error: " + errorMsg);
+        }
+
+        System.out.println("Valor heurístico: " + initialHeur);
+        System.out.println("Peticiones asignadas: " + estado.peticionesAssignadas() + "/" + estado.getPeticiones().length);
+        System.out.println("Camiones usados: " + estado.camionesUsados() + "/" + estado.getCamiones().length);
+
+        System.out.println(estado);
+    }
+
+
+    public static void definirConstants() {
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Valores dados por el enunciado (cambiar únicamente en el código:");
         System.out.print("1. Máximo de viajes por camión: " + Constants.MAX_VIAJES);
         System.out.print("2. Máximo de kilómetros por camión: " + Constants.MAX_KM);
 
-        System.out.print("Selecciona el Estado Inicial [1: Por orden(default), 2: Aleatorio, 3: Greedy]");
-        int option = sc.nextInt();
-        if (option < 1 || option > 3) {
-            System.out.println("Opción no válida. Usando valor por defecto (1: Aleatorio).");
+            System.out.print("Selecciona el Estado Inicial [1: Por orden(default), 2: Aleatorio, 3: Greedy-Distancia, 4: Greedy-Quadrants, 5: Greedy-X]: ");
+        int option = 1;
+        if (sc.hasNextInt()) {
+            option = sc.nextInt();
+            if (option < 1 || option > 5) {
+                System.out.println("Opción no válida. Usando valor por defecto (1: Por orden).");
+                option = 1;
+            }
         } else {
-            Constants.ALGORITMO_ESTADO_INICIAL = option;
+            // keep default
         }
+        Constants.ALGORITMO_ESTADO_INICIAL = option;
 
-        System.out.print("Selecciona el Algoritmo de Busqueda [1: Hill Climbing(default), 2: Simulated Annealing]");
-        option = sc.nextInt();
-        if (option < 1 || option > 2) {
-            System.out.println("Opción no válida. Usando valor por defecto (1: Hill Climbing).");
-        } else {
-            Constants.ALGORITMO_ESTADO_INICIAL = option;
+        System.out.print("Selecciona el Algoritmo de Busqueda [1: Hill Climbing(default), 2: Simulated Annealing]: ");
+        option = 1;
+        if (sc.hasNextInt()) {
+            option = sc.nextInt();
+            if (option < 1 || option > 2) {
+                System.out.println("Opción no válida. Usando valor por defecto (1: Hill Climbing).");
+                option = 1;
+            }
         }
+        Constants.ALGORITMO_BUSQUEDA = option;
 
-       System.out.print("Selecciona la Seed: [R = random, Default: 1234]: ");
-       sc.nextLine(); // Consumir el salto de línea pendiente
-       String input = sc.nextLine();
+    System.out.print("Selecciona la Seed: [R = random, Default: 1234]: ");
+    String input = "";
+    if (sc.hasNext()) input = sc.next();
        if (!input.isEmpty()) {
            try {
                if (input.equalsIgnoreCase("R")) {
@@ -138,29 +199,38 @@ public class Main {
            }
        }
 
-        System.out.print("Selecciona el número de centros de distribución [Default = 10]:");
-        int num = sc.nextInt();
-        if (num < 1) {
-            System.out.println("Opción no válida. Usando valor por defecto (10).");
-        } else {
-            Constants.NUM_CENTROSDISTRIBUCION = num;
+        System.out.print("Selecciona el número de centros de distribución [Default = 10]: ");
+        int num = Constants.NUM_CENTROSDISTRIBUCION;
+        if (sc.hasNextInt()) {
+            num = sc.nextInt();
+            if (num < 1) {
+                System.out.println("Opción no válida. Usando valor por defecto (10).");
+                num = Constants.NUM_CENTROSDISTRIBUCION;
+            }
         }
+        Constants.NUM_CENTROSDISTRIBUCION = num;
 
-        System.out.print("Selecciona el número de gasolineras [Default = 100]:");
-        num = sc.nextInt();
-        if (num < 1) {
-            System.out.println("Opción no válida. Usando valor por defecto (10).");
-        } else {
-            Constants.NUM_GASOLINERAS = num;
+        System.out.print("Selecciona el número de gasolineras [Default = 100]: ");
+        num = Constants.NUM_GASOLINERAS;
+        if (sc.hasNextInt()) {
+            num = sc.nextInt();
+            if (num < 1) {
+                System.out.println("Opción no válida. Usando valor por defecto (100).");
+                num = Constants.NUM_GASOLINERAS;
+            }
         }
+        Constants.NUM_GASOLINERAS = num;
 
-        System.out.print("Selecciona el número de camiones por centro [Default = 1]:");
-        num = sc.nextInt();
-        if (num < 1) {
-            System.out.println("Opción no válida. Usando valor por defecto (10).");
-        } else {
-            Constants.CAMIONES_POR_CENTRO = num;
+        System.out.print("Selecciona el número de camiones por centro [Default = 1]: ");
+        num = Constants.CAMIONES_POR_CENTRO;
+        if (sc.hasNextInt()) {
+            num = sc.nextInt();
+            if (num < 1) {
+                System.out.println("Opción no válida. Usando valor por defecto (1).");
+                num = Constants.CAMIONES_POR_CENTRO;
+            }
         }
+        Constants.CAMIONES_POR_CENTRO = num;
     }
 
     private static void printInstrumentation(Properties properties) {
