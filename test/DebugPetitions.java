@@ -1,8 +1,5 @@
-package main;
-
 import domain.*;
 import IA.Gasolina.*;
-import java.util.*;
 
 public class DebugPetitions {
     public static void main(String[] args) {
