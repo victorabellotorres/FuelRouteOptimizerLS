@@ -21,16 +21,75 @@ public class Main {
 
     public static void main(String[] args) throws Exception{
 
-        // Definir las constantes del problema
-        defineConstants();
+        // ==============================
+        // 1. Definir constantes
+        // ==============================
+        definirConstants();
 
+        // ==============================
+        // 2️. Crear el estado inicial
+        // ==============================
+        P1Board estadoInicial = crearEstadoInicial();
+
+        // ==============================
+        // 3️. Definir funciones de búsqueda
+        // ==============================
+        aima.search.framework.SuccessorFunction sf = new P1SuccessorFunction();
+        Search search = new HillClimbingSearch();
+        P1HeuristicFunction hf = new P1HeuristicFunction();
+
+        definirFunciones(sf, search, hf);
+
+
+        // =============================
+        // Imprimir estadísticas del estado inicial
+        // =============================
+        System.out.println("\n--- Estadísticas del estado inicial ---");
+        imprimirEstadisticasEstado(estadoInicial, hf);
+
+
+        // ==============================
+        // 4️⃣ Crear el problema
+        // ==============================
+        Problem problem = new Problem(
+                estadoInicial,
+                sf,
+                new P1GoalTest(),
+                hf
+        );
+
+        // ==============================
+        // 5️. Ejecutar búsqueda
+        // ==============================
+        long start = System.currentTimeMillis();
+        SearchAgent agent = new SearchAgent(problem, search);
+        long end = System.currentTimeMillis();
+
+        // ==============================
+        // 6️. Mostrar resultados
+        // ==============================
+        P1Board finalState = (P1Board) search.getGoalState();
+
+        System.out.println("\n========= RESULTADOS =========");
+        System.out.println("Tiempo total: " + (end - start) + " ms");
+
+        System.out.println("Estadísticas del estado final:");
+        imprimirEstadisticasEstado(finalState, hf);
+
+        // nodos expandidos:
+        System.out.println("Nodos expandidos: " + search.getMetrics().get("nodesExpanded"));
+
+        System.out.println("\n-- Instrumentación --");
+        printInstrumentation(agent.getInstrumentation());
+        System.out.println("===============================");
+
+    }
+
+    public static P1Board crearEstadoInicial() {
         // Crear el estado inicial
         Gasolineras gasolineras = new Gasolineras(Constants.NUM_GASOLINERAS, Constants.SEED);
         CentrosDistribucion centrosDistribucion = new CentrosDistribucion(Constants.NUM_CENTROSDISTRIBUCION, Constants.CAMIONES_POR_CENTRO, Constants.SEED);
 
-        // ==============================
-        // 2️⃣ Crear el estado inicial
-        // ==============================
         P1Board estadoInicial = null;
         switch (Constants.ALGORITMO_ESTADO_INICIAL) {
             case 2 -> {
@@ -54,64 +113,47 @@ public class Main {
         System.out.println("Estado inicial generado.");
         System.out.println(estadoInicial);
 
-        // Print initial heuristic and basic stats
-        P1HeuristicFunction hf = new P1HeuristicFunction();
-        double initialHeur = hf.getHeuristicValue(estadoInicial);
-        int assigned = 0;
-        for (Peticion p : estadoInicial.getPeticiones()) if (p.getIdCamion() != -1) assigned++;
-        System.out.println("Valor heurístico inicial: " + initialHeur);
-        System.out.println("Peticiones inicialment assignades: " + assigned + "/" + estadoInicial.getPeticiones().length);
+        return estadoInicial;
+    }
 
-    aima.search.framework.SuccessorFunction sf = null;
-    Search search = new HillClimbingSearch();
-
+    public static void definirFunciones(aima.search.framework.SuccessorFunction sf, Search search, P1HeuristicFunction hf) {
+         // Definir las funciones de búsqueda según el algoritmo seleccionado
         if (Constants.ALGORITMO_BUSQUEDA == 2) {
             System.out.println("Usando Simulated Annealing...");
             // Use SA-specific successor and conservative default parameters
-            sf = new P1SuccessorFunctionSA(4);
+            sf = new P1SuccessorFunctionSA(Constants.SA_NEIGHBORS);
             // iterations, stepsPerTemp, k, lambda
             // Increase iterations to allow up to ~20001 node expansions
-            search = new SimulatedAnnealingSearch(20001, 1, 1, 0.001);
+            search = new SimulatedAnnealingSearch(Constants.SA_STEPS, Constants.SA_STITER, Constants.SA_K, Constants.SA_LAMBDA);
         } else {
             System.out.println("Usando Hill Climbing...");
             sf = new P1SuccessorFunction(); // genera todos los sucesores
             search = new HillClimbingSearch();
         }
 
-        // ==============================
-        // 4️⃣ Crear el problema
-        // ==============================
-        Problem problem = new Problem(
-                estadoInicial,
-                sf,
-                new P1GoalTest(),
-                hf
-        );
-
-        // ==============================
-        // 5️⃣ Ejecutar búsqueda
-        // ==============================
-        long start = System.currentTimeMillis();
-        SearchAgent agent = new SearchAgent(problem, search);
-        long end = System.currentTimeMillis();
-
-        // ==============================
-        // 6️⃣ Mostrar resultados
-        // ==============================
-        P1Board finalState = (P1Board) search.getGoalState();
-
-        System.out.println("\n========= RESULTADOS =========");
-        System.out.println("Tiempo total: " + (end - start) + " ms");
-        System.out.println("Valor heurístico final: " + hf.getHeuristicValue(finalState));
-        System.out.println(finalState);
-
-        System.out.println("\n-- Instrumentación --");
-        printInstrumentation(agent.getInstrumentation());
-        System.out.println("===============================");
-
+        hf = new P1HeuristicFunction();
     }
 
-    public static void defineConstants() {
+    public static void imprimirEstadisticasEstado(P1Board estado, P1HeuristicFunction hf) {
+        double initialHeur = hf.getHeuristicValue(estado);
+
+        String errorMsg = "";
+        boolean esSolucion = estado.esSolucion(errorMsg);
+        if (esSolucion) {
+            System.out.println("El estado es una solución válida.");
+        } else {
+            System.out.println("El estado NO es una solución válida. Error: " + errorMsg);
+        }
+
+        System.out.println("Valor heurístico: " + initialHeur);
+        System.out.println("Peticiones asignadas: " + estado.peticionesAssignadas() + "/" + estado.getPeticiones().length);
+        System.out.println("Camiones usados: " + estado.camionesUsados() + "/" + estado.getCamiones().length);
+
+        System.out.println(estado);
+    }
+
+
+    public static void definirConstants() {
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Valores dados por el enunciado (cambiar únicamente en el código:");
