@@ -34,6 +34,7 @@ public class Camion {
      * Constructora por copia.
      */
     public Camion(Camion camion) {
+        this.posicion = new Pair(camion.posicion.first, camion.posicion.second);
         this.kmRestantes = camion.kmRestantes;
         this.viajesRestantes = camion.viajesRestantes;
 
@@ -68,6 +69,9 @@ public class Camion {
     public void setViajes(Pair[] viajes) {
         this.viajes = viajes;
     }
+    public void setViaje(int id, Pair viaje) {
+        this.viajes[id] = viaje;
+    }
     public void addViaje(int peticion, int dia, int km) {
         if (viajesRestantes > 0 && kmRestantes >= km) {
             viajes[MAX_VIAJES - viajesRestantes] = new Pair(peticion, dia);
@@ -84,6 +88,23 @@ public class Camion {
     }
 
     // Otros métodos
+
+    // ==============================
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("posicion=").append(posicion);
+        sb.append(", kmRestantes=").append(kmRestantes);
+        sb.append(", viajesRestantes=").append(viajesRestantes);
+        sb.append(", viajes=[");
+        for (int i = 0; i < MAX_VIAJES; i++) {
+            sb.append(viajes[i]);
+            if (i < MAX_VIAJES - 1) sb.append(", ");
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
 
 
 }

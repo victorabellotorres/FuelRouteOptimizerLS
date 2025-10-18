@@ -49,7 +49,7 @@ public class Main {
 
 
         // ==============================
-        // 4️⃣ Crear el problema
+        // 4️. Crear el problema
         // ==============================
         Problem problem = new Problem(
                 estadoInicial,
@@ -77,10 +77,12 @@ public class Main {
         imprimirEstadisticasEstado(finalState, hf);
 
         // nodos expandidos:
-        System.out.println("Nodos expandidos: " + search.getMetrics().get("nodesExpanded"));
-
         System.out.println("\n-- Instrumentación --");
         printInstrumentation(agent.getInstrumentation());
+        System.out.println("===============================");
+
+        System.out.println("\n-- Acciones --");
+        printActions(agent.getActions());
         System.out.println("===============================");
 
     }
@@ -91,6 +93,7 @@ public class Main {
         CentrosDistribucion centrosDistribucion = new CentrosDistribucion(Constants.NUM_CENTROSDISTRIBUCION, Constants.CAMIONES_POR_CENTRO, Constants.SEED);
 
         P1Board estadoInicial = null;
+//        estadoInicial = InitialBoardGenerator.SolucionSinAsignaciones(gasolineras, centrosDistribucion);
         switch (Constants.ALGORITMO_ESTADO_INICIAL) {
             case 2 -> {
                 System.out.println("Generando estado inicial ALEATORIO...");
@@ -111,8 +114,6 @@ public class Main {
         }
 
         System.out.println("Estado inicial generado.");
-        System.out.println(estadoInicial);
-
         return estadoInicial;
     }
 
@@ -137,12 +138,12 @@ public class Main {
     public static void imprimirEstadisticasEstado(P1Board estado, P1HeuristicFunction hf) {
         double initialHeur = hf.getHeuristicValue(estado);
 
-        String errorMsg = "";
+        StringBuilder errorMsg = new StringBuilder();
         boolean esSolucion = estado.esSolucion(errorMsg);
         if (esSolucion) {
             System.out.println("El estado es una solución válida.");
         } else {
-            System.out.println("El estado NO es una solución válida. Error: " + errorMsg);
+            System.out.println("El estado NO es una solución válida. Error: " + errorMsg.toString());
         }
 
         System.out.println("Valor heurístico: " + initialHeur);
