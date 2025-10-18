@@ -26,4 +26,8 @@ public final class Pair {
         if (first == actual) first = update;
         else if (second == actual) second = update;
     }
+
+    public boolean isEmpty() {
+        return (first == -1 && second == -1);
+    }
 }

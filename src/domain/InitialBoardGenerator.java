@@ -77,6 +77,16 @@ public class InitialBoardGenerator {
         return distancias;
     }
 
+    public static P1Board SolucionSinAsignaciones(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
+        Peticion[] peticiones = crearPeticiones(gasolineras);
+        Camion[] camiones = crearCamiones(centrosDistribucion);
+        Pair[] gasolinerasPos = crearGasolineras(gasolineras);
+        int[][] distanciasGasolineras = precalcularDistanciasGasolineras(gasolinerasPos);
+        int[][] distanciasCamionesGasolineras = precalcularDistanciasCamionesGasolineras(camiones, gasolinerasPos);
+
+        return new P1Board(camiones, gasolinerasPos, peticiones, distanciasGasolineras, distanciasCamionesGasolineras);
+    }
+
     public static P1Board SolucionAsignacionOrdenada(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
 
         // Creamos los vectores necesarios

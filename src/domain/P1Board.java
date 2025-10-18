@@ -92,6 +92,34 @@ public class P1Board {
 
     // Operadores
 
+    // Intercambia la peticion en la posición dada por el idCamion, idViaje y first con la peticion dada por idPeticion2, si no hay ninguna peticion en la posición dada se comporta como un move
+    // Parámetros: first: true si se quiere intercambiar la primera peticion del viaje, false si se quiere intercambiar la segunda peticion del viaje
+    // Devuelve false si el swap no cumple con algunas de las restricciones de kilometros o viajes, o el swap no tiene sentido (la petición ya esta en la posición dada por idCamion e idViaje)
+    public boolean swapPosicionPeticion(int idCamion, int idViaje, boolean first, int idPeticion2) {
+        // Casos sin sentidos
+        if (idCamion >= camiones.length || idCamion < 0) return false;
+        if (idViaje >= Camion.MAX_VIAJES || idViaje < 0) return false;
+        if (idPeticion2 >= peticiones.length || idPeticion2 < 0) return false;
+        // Si estan en el mismo viaje
+        if (peticiones[idPeticion2].getIdCamion() == idCamion && peticiones[idPeticion2].getIdViaje() == idViaje) return false;
+
+        Camion camion = camiones[idCamion];
+        Pair v = camion.getViajes()[idViaje];
+        int idPeticion1;
+        if (first) idPeticion1 = v.first;
+        else idPeticion1 = v.second;
+        // Si son la misma peticion
+        if (idPeticion1 == idPeticion2) return false;
+
+        if (idPeticion1 == -1) {
+            return movePeticionToPosicion(idCamion, idViaje, first, idPeticion2);
+        }
+        else {
+            return swapPeticiones(idPeticion1, idPeticion2);
+        }
+
+    }
+
     // Intercambia dos peticiones en el array de peticiones
     // Devuelve false si el swap no cumple con algunas de las restricciones de kilometros o viajes, o el swap no tiene sentido (e.g. i y j no estan asignadas a ningún camion)
     public boolean swapPeticiones(int i, int j) {
@@ -230,13 +258,174 @@ public class P1Board {
         return true;
     }
 
+    public boolean movePeticionToPosicion(int idCamion, int idViaje, boolean first, int idPeticion) {
+        // Casos sin sentidos
+        if (idCamion >= camiones.length || idCamion < 0) return false;
+        if (idViaje >= Camion.MAX_VIAJES || idViaje < 0) return false;
+        if (idPeticion >= peticiones.length || idPeticion < 0) return false;
+
+        Camion camion = camiones[idCamion];
+        Pair v = camion.getViajes()[idViaje];
+        int idPeticionPos;
+        if (first) idPeticionPos = v.first;
+        else idPeticionPos = v.second;
+        // Si hay una peticion en la posicion
+        if (idPeticionPos != -1) return false;
+
+        // Calculamos la nueva distancia del camión si se añade la petición
+        int distanciaActual = getDistanciaViaje(idCamion, idViaje);
+
+        if (first) camiones[idCamion].getViajes()[idViaje].first = idPeticion;
+        else camiones[idCamion].getViajes()[idViaje].second = idPeticion;
+        // Actualizamos el vector de posiciones
+        peticiones[idPeticion].setIdCamion(idCamion);
+        peticiones[idPeticion].setIdViaje(idViaje);
+
+        int nuevaDistancia = getDistanciaViaje(idCamion, idViaje);
+
+        int distanciaCamion = camiones[idCamion].getKmUsados() - distanciaActual + nuevaDistancia;
+        if (distanciaCamion > Camion.MAX_KM) {
+            // Deshacemos los cambios
+            if (first) camiones[idCamion].getViajes()[idViaje].first = -1;
+            else camiones[idCamion].getViajes()[idViaje].second = -1;
+
+            peticiones[idPeticion].setIdCamion(-1);
+            peticiones[idPeticion].setIdViaje(-1);
+            return false;
+        }
+        camiones[idCamion].setKmRestantes(Camion.MAX_KM - distanciaCamion);
+        if (first && v.second == -1) {
+            camiones[idCamion].setViajesRestantes(camiones[idCamion].getViajesRestantes() - 1);
+        } else if (!first && v.first == -1) {
+            camiones[idCamion].setViajesRestantes(camiones[idCamion].getViajesRestantes() - 1);
+        }
+        return true;
+    }
+
+    public boolean swapViajes(int idCamion1, int idViaje1, int idCamion2, int idViaje2) {
+        // Casos sin sentidos
+        if (idCamion1 >= camiones.length || idCamion1 < 0) return false;
+        if (idViaje1 >= Camion.MAX_VIAJES || idViaje1 < 0) return false;
+        if (idCamion2 >= camiones.length || idCamion2 < 0) return false;
+        if (idViaje2 >= Camion.MAX_VIAJES || idViaje2 < 0) return false;
+
+        if (idCamion1 == idCamion2) return false;
+
+        Pair viaje1 = camiones[idCamion1].getViajes()[idViaje1];
+        Pair viaje2 = camiones[idCamion2].getViajes()[idViaje2];
+
+        int distanciaViaje1before = getDistanciaViaje(idCamion1, idViaje1);
+        int distanciaViaje2before = getDistanciaViaje(idCamion2, idViaje2);
+
+        // Intercambiamos los viajes y actualizamos las peticiones
+        camiones[idCamion1].setViaje(idViaje1, new Pair(viaje2.first, viaje2.second));
+        camiones[idCamion2].setViaje(idViaje2, new Pair(viaje1.first, viaje1.second));
+
+        if (viaje1.first != -1) {
+            peticiones[viaje1.first].setIdCamion(idCamion2);
+            peticiones[viaje1.first].setIdViaje(idViaje2);
+        }
+        if (viaje1.second != -1) {
+            peticiones[viaje1.second].setIdCamion(idCamion2);
+            peticiones[viaje1.second].setIdViaje(idViaje2);
+        }
+
+        if (viaje2.first != -1) {
+            peticiones[viaje2.first].setIdCamion(idCamion1);
+            peticiones[viaje2.first].setIdViaje(idViaje1);
+        }
+
+        if (viaje2.second != -1) {
+            peticiones[viaje2.second].setIdCamion(idCamion1);
+            peticiones[viaje2.second].setIdViaje(idViaje1);
+        }
+
+        int distanciaViaje1after = getDistanciaViaje(idCamion1, idViaje1);
+        int distanciaViaje2after = getDistanciaViaje(idCamion2, idViaje2);
+
+        if (camiones[idCamion1].getKmUsados() - distanciaViaje1before + distanciaViaje2after > Camion.MAX_KM || camiones[idCamion2].getKmUsados() - distanciaViaje2before + distanciaViaje1after > Camion.MAX_KM) {
+            // Deshacemos el intercambio
+//            camiones[idCamion1].setViaje(idViaje1, viaje1);
+//            camiones[idCamion2].setViaje(idViaje2, viaje2);
+
+//            if (viaje1.first != -1) {
+//                peticiones[viaje1.first].setIdCamion(idCamion1);
+//                peticiones[viaje1.first].setIdViaje(idViaje1);
+//            }
+//            if (viaje1.second != -1) {
+//                peticiones[viaje1.second].setIdCamion(idCamion1);
+//                peticiones[viaje1.second].setIdViaje(idViaje1);
+//            }
+//
+//            if (viaje2.first != -1) {
+//                peticiones[viaje2.first].setIdCamion(idCamion2);
+//                peticiones[viaje2.first].setIdViaje(idViaje2);
+//            }
+//
+//            if (viaje2.second != -1) {
+//                peticiones[viaje2.second].setIdCamion(idCamion2);
+//                peticiones[viaje2.second].setIdViaje(idViaje2);
+//            }
+            return false;
+        }
+
+        // Actualizamos los km y viajes de cada camion
+        camiones[idCamion1].setKmRestantes(Camion.MAX_KM - (camiones[idCamion1].getKmUsados() - distanciaViaje1before + distanciaViaje1after));
+        camiones[idCamion2].setKmRestantes(Camion.MAX_KM - (camiones[idCamion2].getKmUsados() - distanciaViaje2before + distanciaViaje2after));
+
+        if (!viaje1.isEmpty()) {
+            camiones[idCamion1].setViajesRestantes(camiones[idCamion1].getViajesRestantes() + 1);
+            camiones[idCamion2].setViajesRestantes(camiones[idCamion2].getViajesRestantes() - 1);
+        }
+        if (!viaje2.isEmpty()) {
+            camiones[idCamion2].setViajesRestantes(camiones[idCamion2].getViajesRestantes() + 1);
+            camiones[idCamion1].setViajesRestantes(camiones[idCamion1].getViajesRestantes() - 1);
+        }
+
+        return true;
+    }
+
+    public boolean swapCamiones(int idCamion1, int idCamion2) {
+        // Casos sin sentidos
+        if (idCamion1 >= camiones.length || idCamion1 < 0) return false;
+        if (idCamion2 >= camiones.length || idCamion2 < 0) return false;
+        if (idCamion1 == idCamion2) return false;
+
+
+        Camion next_camion2 = new Camion(camiones[idCamion1]);
+        next_camion2.setPosicion(camiones[idCamion2].getPosicion());
+
+        Camion next_camion1 = new Camion(camiones[idCamion2]);
+        next_camion1.setPosicion(camiones[idCamion1].getPosicion());
+
+        camiones[idCamion1] = next_camion1;
+        camiones[idCamion2] = next_camion2;
+
+        // Actualizamos las peticiones
+        for (int i = 0; i < peticiones.length; ++i) {
+            if (peticiones[i].getIdCamion() == idCamion1) {
+                peticiones[i].setIdCamion(idCamion2);
+            } else if (peticiones[i].getIdCamion() == idCamion2) {
+                peticiones[i].setIdCamion(idCamion1);
+            }
+        }
+
+        int kmCamion1 = recalcularKmCamion(idCamion1);
+        int kmCamion2 = recalcularKmCamion(idCamion2);
+        if (kmCamion1 > Camion.MAX_KM || kmCamion2 > Camion.MAX_KM) {
+            return false;
+        }
+
+        return true;
+    }
+
     // Métodos auxiliares
 
     // Devuelve true si el estado es una solución que cumple con los requisitos:
     //      1. No supera el máximo de kilometros
     //      2. No supera el máximo de viajes
     // Devuelve el primer error que encuentra, no todos.
-    public boolean esSolucion(String errorMsg) {
+    public boolean esSolucion(StringBuilder errorMsg) {
         for (int i = 0; i < camiones.length; ++i) {
             int sumaDistancias = 0;
             int viajes = 0;
@@ -246,26 +435,22 @@ public class P1Board {
                 if (distanciaViaje == 0) continue; // Si el viaje no tiene peticiones asignadas, no hace falta seguir comprobando
 
                 ++viajes;
-
-                if (distanciaViaje != camiones[i].getKmUsados()) {
-                    errorMsg = "Error: El camión " + i + " tiene un error en el cálculo de kilómetros usados.";
-                }
                 sumaDistancias += distanciaViaje;
             }
             if (sumaDistancias != camiones[i].getKmUsados()) {
-                errorMsg = "Error: El camión " + i + " tiene un error en el cálculo de kilómetros usados.";
+                errorMsg.append("Error: El camión " + i + " tiene un error en el cálculo de kilómetros usados.");
                 return false;
             }
             if (sumaDistancias > Camion.MAX_KM) {
-                errorMsg = "Error: El camión " + i + " supera el máximo de kilómetros.";
+                errorMsg.append("Error: El camión " + i + " supera el máximo de kilómetros.");
                 return false;
             }
             if (viajes != camiones[i].getViajesUsados()) {
-                errorMsg = "Error: El camión " + i + " tiene un error en el cálculo de viajes usados.";
+                errorMsg.append("Error: El camión " + i + " tiene un error en el cálculo de viajes usados.");
                 return false;
             }
             if (viajes > Camion.MAX_VIAJES) {
-                errorMsg = "Error: El camión " + i + " supera el máximo de viajes.";
+                errorMsg.append("Error: El camión " + i + " supera el máximo de viajes.");
                 return false;
             }
         }
@@ -301,5 +486,46 @@ public class P1Board {
             int idGasolinera2 = peticiones[v.second].getGasolinera();
             return P1Board.distanciasCamionesGasolineras[idCamion][idGasolinera1] + P1Board.distanciasGasolineras[idGasolinera1][idGasolinera2] + P1Board.distanciasCamionesGasolineras[idCamion][idGasolinera2];
         }
+    }
+
+    public double getDistanciaMediaCamiones(int idGasolinera) {
+
+        int suma = 0;
+        int count = 0;
+        for (int i = 0; i < distanciasCamionesGasolineras.length; ++i) {
+            suma += distanciasCamionesGasolineras[i][idGasolinera];
+            ++count;
+        }
+        return suma / count;
+    }
+
+    public int recalcularKmCamion(int idCamion) {
+        int suma = 0;
+        for (int j = 0; j < Camion.MAX_VIAJES; ++j) {
+            suma += getDistanciaViaje(idCamion, j);
+        }
+        camiones[idCamion].setKmRestantes(Camion.MAX_KM - suma);
+        return suma;
+    }
+
+
+    // ==============================
+    // 🔹 Representación
+    // ==============================
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== ESTADO ===\n");
+        for (int i = 0; i < camiones.length; i++) {
+            sb.append("Camión ").append(i).append(" -> ").append(camiones[i].toString()).append("\n");
+        }
+        for (int i = 0; i < peticiones.length; i++) {
+            if (peticiones[i].getIdCamion() != -1) {
+                sb.append("Petición ").append(i).append(" (Gasolinera: ").append(peticiones[i].getGasolinera()).append("(").append(gasolineras[peticiones[i].getGasolinera()]).append(")").append(", Días: ").append(peticiones[i].getDias()).append(") -> Asignada al Camión ").append(peticiones[i].getIdCamion()).append(", Viaje ").append(peticiones[i].getIdViaje()).append("\n");
+            } else {
+                sb.append("Petición ").append(i).append(" (Gasolinera: ").append(peticiones[i].getGasolinera()).append("(").append(gasolineras[peticiones[i].getGasolinera()]).append(")").append(", Días: ").append(peticiones[i].getDias()).append(") -> No asignada\n");
+            }
+        }
+        return sb.toString();
     }
 }
