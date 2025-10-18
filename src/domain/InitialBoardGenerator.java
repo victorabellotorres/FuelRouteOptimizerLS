@@ -222,7 +222,7 @@ public class InitialBoardGenerator {
         int n = peticiones.length;
         int[] order = new int[n];
         for (int i = 0; i < n; i++) order[i] = i;
-        Random rnd = new Random(main.Constants.SEED);
+        Random rnd = new Random();
         for (int i = n - 1; i > 0; i--) {
             int j = rnd.nextInt(i + 1);
             int tmp = order[i]; order[i] = order[j]; order[j] = tmp;
