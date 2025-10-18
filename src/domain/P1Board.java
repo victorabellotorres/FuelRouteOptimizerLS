@@ -1,5 +1,7 @@
 package domain;
 
+import main.Constants;
+
 public class P1Board {
 
     // Atributos estáticos
@@ -431,8 +433,8 @@ public class P1Board {
             int viajes = 0;
             // Comprobamos la restricción de kilometros y viajes recorriendo el vector y no mirando directamente los km restantes y miramos que cuadren.
             for (int j = 0; j < Camion.MAX_VIAJES; ++j) {
+                if (camiones[i].getViajes()[j].isEmpty()) continue; // Si el viaje no tiene peticiones asignadas, no hace falta seguir comprobando
                 int distanciaViaje = getDistanciaViaje(i, j);
-                if (distanciaViaje == 0) continue; // Si el viaje no tiene peticiones asignadas, no hace falta seguir comprobando
 
                 ++viajes;
                 sumaDistancias += distanciaViaje;
@@ -508,9 +510,65 @@ public class P1Board {
         return suma;
     }
 
+    public double getCalidad() {
+        double beneficio = 0.0;
+        double coste = 0.0;
+
+
+
+        // Heurística (AIMA minimiza, por lo que restamos el beneficio al coste para que salga negativo)
+        return beneficio-coste;
+    }
+
+    public double getBeneficio() {
+        double beneficio = 0.0;
+        // Beneficio: peticiones atendidas hoy (solo las que tienen camion asignado)
+        for (Peticion p : peticiones) {
+            double porcentaje = 0.0;
+            // Si la peticion no tiene camion asignado, el beneficio es el que se obtiene si asumimos que se atiende un día después.
+            if (p.getIdCamion() == -1) porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias()+1)));
+            else {
+                porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
+            }
+            beneficio += main.Constants.VALOR_DEPOSITO * (porcentaje / 100.0);
+        }
+        return beneficio;
+    }
+
+    public double getCoste() {
+        double coste = 0.0;
+        // Coste: kilómetros totales recorridos
+        for (Camion c : camiones) {
+            coste += c.getKmUsados() * main.Constants.COSTE_KM;
+        }
+        return coste;
+    }
 
     // ==============================
-    // 🔹 Representación
+    // Metricas
+    // ==============================
+    public BoardMetrics getMetrics() {
+        StringBuilder err = new StringBuilder();
+        boolean valid = esSolucion(err);
+        String errorMsg = err.length() == 0 ? "" : err.toString();
+
+        int peticionesAssignadas = peticionesAssignadas();
+        int peticionesTotales = peticiones.length;
+        int camionesUsados = camionesUsados();
+        int camionesTotales = camiones.length;
+
+        int totalKm = 0;
+        for (Camion c : camiones) {
+            int km = c.getKmUsados();
+            totalKm += km;
+        }
+        double kmMediosPorCamion = camiones.length > 0 ? (double) totalKm / camiones.length : 0.0;
+
+        return new BoardMetrics(valid, errorMsg, peticionesAssignadas, peticionesTotales, camionesUsados, camionesTotales, totalKm, kmMediosPorCamion, getBeneficio(), getCoste());
+    }
+
+    // ==============================
+    // Representación
     // ==============================
     @Override
     public String toString() {
