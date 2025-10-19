@@ -12,8 +12,8 @@ public class MainExperiment {
         System.out.println("   🧪 Proyecto IA - Experimentos");
         System.out.println("======================================");
         System.out.println("Selecciona el experimento a ejecutar:");
-        System.out.println("1️⃣  Experimento 1 - Operadores de sucesores");
-        System.out.println("2️⃣  Experimento 2 - Inicializadores (Hill Climbing)");
+        System.out.println("1️  Experimento 1 - Operadores de sucesores");
+        System.out.println("2️  Experimento 2 - Inicializadores (Hill Climbing)");
         System.out.print("Opción [1/2]: ");
 
         int opcion = 1;

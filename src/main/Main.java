@@ -147,6 +147,7 @@ public class Main {
         }
 
         System.out.println("Valor heurístico: " + initialHeur);
+        System.out.println("Beneficio total: " + (estado.getBeneficio()-estado.getCoste()));
         System.out.println("Peticiones asignadas: " + estado.peticionesAssignadas() + "/" + estado.getPeticiones().length);
         System.out.println("Camiones usados: " + estado.camionesUsados() + "/" + estado.getCamiones().length);
 
