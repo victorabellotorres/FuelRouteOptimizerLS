@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
-# === Asegurarse de que existe la carpeta de salida ===
+# === Crear carpeta de salida ===
 os.makedirs("data/plots", exist_ok=True)
 
-# === Cargar el CSV ===
+# === Cargar datos ===
 df = pd.read_csv("data/experimento2.csv")
 
 # === Convertir columnas numéricas ===
@@ -20,64 +20,69 @@ for col in cols_numericas:
     if col in df.columns:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-# === Calcular medias agrupadas por tipo de inicialización ===
+# === Calcular métricas derivadas ===
+df["deltaHeur"] = df["finalHeur"] - df["initialHeur"]
+
+# ===  Resumen general ===
 resumen = df.groupby("initial").agg({
-    "timeMs": "mean",
-    "nodesExpanded": "mean",
     "initialHeur": "mean",
     "finalHeur": "mean",
-    "profitIni": "mean",
+    "deltaHeur": "mean",
     "profitFi": "mean",
-    "costIni": "mean",
-    "costFi": "mean"
+    "timeMs": "mean"
 }).round(2)
 
-print("\n📊 RESUMEN ESTADÍSTICO POR TIPO DE INICIALIZADOR:")
+print("\n RESUMEN ESTADÍSTICO (medias por inicializador):")
 print(resumen)
-print("\n====================================================\n")
+print("\nRecuerda: menor heurística = mejor. Δ negativo = mejora.\n")
+print("====================================================\n")
 
-# === Configuración visual ===
+# === Estilo visual ===
 sns.set_theme(style="whitegrid", palette="muted")
 
-# --- Heurística final ---
-plt.figure(figsize=(9,5))
-sns.barplot(data=df, x="initial", y="finalHeur", hue="initial", legend=False, errorbar="sd")
-plt.title("Heurística final por tipo de inicializador (menor = mejor)")
-plt.ylabel("Valor heurístico final")
-plt.xticks(rotation=30)
+# ===  Boxplot 1: Heurística final (calidad final del estado) ===
+plt.figure(figsize=(9,6))
+sns.boxplot(data=df, x="initial", y="finalHeur", palette="coolwarm")
+plt.title("Heurística final por inicializador (menor = mejor calidad de solución)")
+plt.ylabel("Heurística final")
+plt.xlabel("Método de inicialización")
+plt.xticks(rotation=20)
 plt.tight_layout()
-plt.savefig("data/plots/heuristica_final.png", dpi=300)
+plt.savefig("data/plots/1_boxplot_heuristica_final.png", dpi=300)
 plt.show()
 
-# --- Beneficio final ---
-plt.figure(figsize=(9,5))
-sns.barplot(data=df, x="initial", y="profitFi", hue="initial", legend=False, errorbar="sd", palette="viridis")
-plt.title("Beneficio medio final por inicializador (mayor = mejor)")
-plt.ylabel("Beneficio medio final")
-plt.xticks(rotation=30)
+# === Boxplot 2: Mejora de heurística (Δ) ===
+plt.figure(figsize=(9,6))
+sns.boxplot(data=df, x="initial", y="deltaHeur", palette="RdBu_r")
+plt.title("Mejora en heurística (Δ = heurFinal - heurInicial)")
+plt.axhline(0, color="gray", linestyle="--", linewidth=1)
+plt.ylabel("Cambio en heurística (Δ) — más negativo = mayor mejora")
+plt.xlabel("Método de inicialización")
+plt.xticks(rotation=20)
 plt.tight_layout()
-plt.savefig("data/plots/beneficio_final.png", dpi=300)
+plt.savefig("data/plots/2_boxplot_delta_heuristica.png", dpi=300)
 plt.show()
 
-# --- Tiempo medio ---
-plt.figure(figsize=(9,5))
-sns.barplot(data=df, x="initial", y="timeMs", hue="initial", legend=False, errorbar="sd", palette="magma")
-plt.title("Tiempo medio de ejecución por inicializador (ms)")
+# ===  Boxplot 3: Beneficio final ===
+plt.figure(figsize=(9,6))
+sns.boxplot(data=df, x="initial", y="profitFi", palette="viridis")
+plt.title("Beneficio final por inicializador (mayor = mejor rendimiento económico)")
+plt.ylabel("Beneficio final")
+plt.xlabel("Método de inicialización")
+plt.xticks(rotation=20)
+plt.tight_layout()
+plt.savefig("data/plots/3_boxplot_beneficio_final.png", dpi=300)
+plt.show()
+
+# ===  Boxplot 4: Tiempo de ejecución ===
+plt.figure(figsize=(9,6))
+sns.boxplot(data=df, x="initial", y="timeMs", palette="magma")
+plt.title("Tiempo de ejecución por inicializador (menor = más eficiente)")
 plt.ylabel("Tiempo (ms)")
-plt.xticks(rotation=30)
+plt.xlabel("Método de inicialización")
+plt.xticks(rotation=20)
 plt.tight_layout()
-plt.savefig("data/plots/tiempo_medio.png", dpi=300)
+plt.savefig("data/plots/4_boxplot_tiempo.png", dpi=300)
 plt.show()
 
-# --- Nodos expandidos ---
-plt.figure(figsize=(9,5))
-sns.barplot(data=df, x="initial", y="nodesExpanded", hue="initial", legend=False, errorbar="sd", palette="crest")
-plt.title("Nodos expandidos por inicializador")
-plt.ylabel("Nodos expandidos")
-plt.xticks(rotation=30)
-plt.tight_layout()
-plt.savefig("data/plots/nodos_expandidos.png", dpi=300)
-plt.show()
-
-print("✅ Gráficas guardadas en: data/plots/")
-
+print("✅ Boxplots generados correctamente en: data/plots/")
