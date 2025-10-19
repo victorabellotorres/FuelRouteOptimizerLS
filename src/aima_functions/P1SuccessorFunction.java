@@ -8,15 +8,21 @@ import java.util.*;
 
 public class P1SuccessorFunction implements SuccessorFunction {
 
+    public static boolean[] operatorsEnabled = {
+            true,   // swapPosicionPeticion
+            true,   // swapViajes
+            true    // swapCamiones
+    };
+
     @Override
     public List getSuccessors(Object o) {
         P1Board actual = (P1Board) o;
+//      sucesores.addAll(successorsSwapPeticiones(actual)); // No va bien
 
         ArrayList<Successor> sucesores = new ArrayList<>();
-//      sucesores.addAll(successorsSwapPeticiones(actual));
-        sucesores.addAll(successorsSwapPosicionPeticion(actual));
-        sucesores.addAll(successorsSwapViajes(actual));
-        sucesores.addAll(successorsSwapCamiones(actual));
+        if (operatorsEnabled[0]) sucesores.addAll(successorsSwapPosicionPeticion(actual));
+        if (operatorsEnabled[1]) sucesores.addAll(successorsSwapViajes(actual));
+        if (operatorsEnabled[2]) sucesores.addAll(successorsSwapCamiones(actual));
         return sucesores;
     }
 
@@ -84,6 +90,12 @@ public class P1SuccessorFunction implements SuccessorFunction {
             }
         }
         return sucesores;
+    }
+
+    public static void setOperatorsEnabled(boolean[] operations) {
+        operatorsEnabled[0] = operations[0];
+        operatorsEnabled[1] = operations[1];
+        operatorsEnabled[2] = operations[2];
     }
 
 }
