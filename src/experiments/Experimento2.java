@@ -1,114 +1,108 @@
-//package experiments;
-//
-//import aima.search.framework.Search;
-//import aima.search.informed.HillClimbingSearch;
-//import aima_functions.P1HeuristicFunction;
-//import aima_functions.P1SuccessorFunction;
-//import domain.*;
-//import IA.Gasolina.*;
-//import aima.*;
-//
-//import org.apache.commons.csv.*;
-//import org.apache.commons.io.*;
-//import org.apache.commons.codec.*;
-//import java.io.*;
-//import java.nio.charset.StandardCharsets;
-//import java.util.*;
-//
-//import java.util.Random;
-//
-//public class Experimento2 {
-//
-//    public static int ITERACIONES = 10;
-//    public static int ITERACIONES_ALEATORIO = 5;
-//    public static int NUM_CENTROS_DISTRIBUCION = 10;
-//    public static int NUM_GASOLINERAS = 100;
-//    public static int NUM_CAMIONES_POR_CENTRO = 1;
-//    public static String[] ALGORITMOS_ESTADO_INICIAL = {
-//            "ORDENADO",
-//            "ALEATORIO",
-//            "GREEDY_DISTANCIAS",
-//            "GREEDY_CUADRANTES",
-//            "GREEDY_EJE_X"
-//    };
-//
-//    public void run() throws IOException {
-//        File file = new File("data/experimento1.csv");
-//        if (file.exists() && file.length() != 0) {
-//            // Eliminamos el contenido del archivo
-//            FileUtils.writeStringToFile(file, "", StandardCharsets.UTF_8);
-//        }
-//
-//        Random r = new Random();
-//        for (int i = 0; i < ITERACIONES; i++) {
-//            int SEED = r.nextInt(1000000);
-//            System.out.println("===========================================================");
-//            System.out.println("Iteración " + i + "/" + (ITERACIONES - 1));
-//
-//            System.out.println("Generando gasolineras y centros de distribución...");
-//            Gasolineras gasolineras = new Gasolineras(NUM_GASOLINERAS, SEED);
-//            CentrosDistribucion centrosDistribucion = new CentrosDistribucion(NUM_CENTROS_DISTRIBUCION, NUM_CAMIONES_POR_CENTRO, SEED);
-//
-//
-//            System.out.println("Generando estados iniciales...");
-//            System.out.println("===========================================================");
-//
-//            P1Board[] estadosIniciales = new P1Board[ALGORITMOS_ESTADO_INICIAL.length];
-//            estadosIniciales[0] = InitialBoardGenerator.SolucionAsignacionOrdenada(gasolineras, centrosDistribucion);
-//            estadosIniciales[1] = InitialBoardGenerator.SolucionAsignacionAleatoria(gasolineras, centrosDistribucion);
-//            estadosIniciales[2] = InitialBoardGenerator.SolucionAsignacionGreedyDistancia(gasolineras, centrosDistribucion);
-//            estadosIniciales[3] = InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gasolineras, centrosDistribucion);
-//            estadosIniciales[4] = InitialBoardGenerator.SolucionAsignacionGreedyEjes(gasolineras, centrosDistribucion);
-//
-//            for (int j = 0; j < ALGORITMOS_ESTADO_INICIAL.length; j++) {
-//                String tipoEstadoInicial = ALGORITMOS_ESTADO_INICIAL[j];
-//                P1Board estadoInicial = estadosIniciales[j];
-//
-//                int iteracionesActuales = tipoEstadoInicial.equals("ALEATORIO") ? ITERACIONES_ALEATORIO : 1;
-//                for (int k = 0; k < iteracionesActuales; k++) {
-//                    aima.search.framework.SuccessorFunction sf = new P1SuccessorFunction();
-//                    Search search = new HillClimbingSearch();
-//                    P1HeuristicFunction hf = new P1HeuristicFunction();
-//                }
-//                exportarDatos(estadoInicial, tipoEstadoInicial, SEED, i);
-//            }
-//        }
-//
-//        private void exportarDatos(P1Board estadoInicial, String tipoEstadoInicial, int seed, int iteracion) throws IOException {
-//            BoardMetrics metrics = estadoInicial.getMetrics();
-//
-//            File file = new File("data/estados_iniciales.csv");
-//            boolean writeHeader = !file.exists() || file.length() == 0;
-//            String header = "algoritmo,seed,iteration,valid,peticionesAsignadas,peticionesTotales,camionesUsados,camionesTotales,totalKm,kmMedioCamion,beneficio,coste,calidad,errorMessage\n";
-//
-//            try (Writer out = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8)) {
-//                if (writeHeader) {
-//                    out.write(header);
-//                }
-//                try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT)) {
-//                    printer.printRecord(
-//                            tipoEstadoInicial,
-//                            seed,
-//                            iteracion,
-//                            metrics.isValid(),
-//                            metrics.getPeticionesAssignadas(),
-//                            metrics.getPeticionesTotales(),
-//                            metrics.getCamionesUsados(),
-//                            metrics.getCamionesTotales(),
-//                            metrics.getTotalKm(),
-//                            metrics.getKmMedioCamion(),
-//                            metrics.getBeneficio(),
-//                            metrics.getCoste(),
-//                            metrics.getCalidad(),
-//                            metrics.getErrorMessage()
-//                    );
-//                    printer.flush();
-//                }
-//                catch (Exception e) {
-//                    throw new RuntimeException(e);
-//                }
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//    }
+package experiments;
+
+import domain.*;
+import aima_functions.*;
+import IA.Gasolina.*;
+import main.Constants;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Random;
+
+import aima.search.framework.*;
+import aima.search.informed.HillClimbingSearch;
+
+public class Experimento2 {
+
+    // 🔹 Reducimos repeticiones para probar más rápido
+    private static final int REPETICIONES = 5;
+    private static final String OUTPUT_FILE = "data/experimento2.csv";
+
+    // ✅ Método principal para ejecutar desde terminal
+    public static void main(String[] args) throws Exception {
+        // 🔹 Ajustamos constantes de entorno antes de ejecutar
+        Constants.NUM_GASOLINERAS = 50;
+        Constants.NUM_CENTROSDISTRIBUCION = 5;
+        Constants.CAMIONES_POR_CENTRO = 1;
+        Constants.SEED = 1234;
+
+        new Experimento2().run();
+    }
+
+    public void run() throws Exception {
+        try (FileWriter writer = new FileWriter(OUTPUT_FILE)) {
+            writer.write("iteration,seed,initial,algorithm,timeMs,initialHeur,finalHeur,assigned,nodesExpanded,profitIni,profitFi,costIni,costFi\n");
+
+            // Inicializadores disponibles
+            int[] inicializadores = {1, 2, 3, 4, 5};
+            String[] nombres = {"Ordenada", "Aleatoria", "GreedyDistancia", "GreedyQuadrants", "GreedyEjes"};
+
+            // 🔁 Bucle principal: repetimos el experimento con distintas seeds
+            for (int rep = 1; rep <= REPETICIONES; rep++) {
+                int seed = 1234 + rep;
+                System.out.println("\n==============================");
+                System.out.println("🧪 REPETICIÓN " + rep + " — Seed: " + seed);
+                System.out.println("==============================");
+
+                // 🔹 Mismo entorno para todos los inicializadores en esta repetición
+                Gasolineras gas = new Gasolineras(Constants.NUM_GASOLINERAS, seed);
+                CentrosDistribucion centros = new CentrosDistribucion(Constants.NUM_CENTROSDISTRIBUCION, Constants.CAMIONES_POR_CENTRO, seed);
+
+                // 🔁 Para cada tipo de inicializador
+                for (int idx = 0; idx < inicializadores.length; idx++) {
+                    int initType = inicializadores[idx];
+                    String nombre = nombres[idx];
+                    System.out.println("\n=== 🧩 INICIALIZADOR: " + nombre + " ===");
+
+                    // --- Generar estado inicial según el tipo ---
+                    P1Board estadoInicial = switch (initType) {
+                        case 2 -> InitialBoardGenerator.SolucionAsignacionAleatoria(gas, centros);
+                        case 3 -> InitialBoardGenerator.SolucionAsignacionGreedyDistancia(gas, centros);
+                        case 4 -> InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gas, centros);
+                        case 5 -> InitialBoardGenerator.SolucionAsignacionGreedyEjes(gas, centros);
+                        default -> InitialBoardGenerator.SolucionAsignacionOrdenada(gas, centros);
+                    };
+
+                    // --- Configurar Hill Climbing ---
+                    P1HeuristicFunction hf = new P1HeuristicFunction();
+                    SuccessorFunction sf = new P1SuccessorFunction();
+                    Search search = new HillClimbingSearch();
+                    Problem problem = new Problem(estadoInicial, sf, new P1GoalTest(), hf);
+
+                    // --- Métricas iniciales ---
+                    double heurIni = hf.getHeuristicValue(estadoInicial);
+                    double profitIni = estadoInicial.getBeneficio();
+                    double costIni = estadoInicial.getCoste();
+
+                    // --- Ejecutar búsqueda ---
+                    long start = System.currentTimeMillis();
+                    SearchAgent agent = new SearchAgent(problem, search);
+                    long end = System.currentTimeMillis();
+
+                    // --- Resultados finales ---
+                    P1Board estadoFinal = (P1Board) search.getGoalState();
+                    double heurFi = hf.getHeuristicValue(estadoFinal);
+                    double profitFi = estadoFinal.getBeneficio();
+                    double costFi = estadoFinal.getCoste();
+                    int nodesExpanded = Integer.parseInt(agent.getInstrumentation().getProperty("nodesExpanded"));
+                    int assigned = estadoFinal.peticionesAssignadas();
+
+                    // --- Guardar línea en CSV ---
+                    writer.write(rep + "," + seed + "," + nombre + ",HillClimbing," +
+                            (end - start) + "," + heurIni + "," + heurFi + "," +
+                            assigned + "," + nodesExpanded + "," +
+                            profitIni + "," + profitFi + "," + costIni + "," + costFi + "\n");
+
+                    // --- Log en consola ---
+                    System.out.printf("→ [%s | Seed=%d] heurIni=%.2f heurFi=%.2f Δ=%.2f profitFi=%.2f time=%.2fs%n",
+                            nombre, seed, heurIni, heurFi, (heurFi - heurIni),
+                            profitFi, (end - start) / 1000.0);
+                }
+            }
+
+            System.out.println("\n✅ Experimento 2 completado. Resultados guardados en: " + OUTPUT_FILE);
+        } catch (IOException e) {
+            System.err.println("❌ Error al escribir el archivo CSV: " + e.getMessage());
+        }
+    }
+}
