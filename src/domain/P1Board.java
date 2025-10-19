@@ -345,7 +345,7 @@ public class P1Board {
         int distanciaViaje1after = getDistanciaViaje(idCamion1, idViaje1);
         int distanciaViaje2after = getDistanciaViaje(idCamion2, idViaje2);
 
-        if (camiones[idCamion1].getKmUsados() - distanciaViaje1before + distanciaViaje2after > Camion.MAX_KM || camiones[idCamion2].getKmUsados() - distanciaViaje2before + distanciaViaje1after > Camion.MAX_KM) {
+        if (camiones[idCamion1].getKmUsados() - distanciaViaje1before + distanciaViaje1after > Camion.MAX_KM || camiones[idCamion2].getKmUsados() - distanciaViaje2before + distanciaViaje2after > Camion.MAX_KM) {
             // Deshacemos el intercambio
 //            camiones[idCamion1].setViaje(idViaje1, viaje1);
 //            camiones[idCamion2].setViaje(idViaje2, viaje2);

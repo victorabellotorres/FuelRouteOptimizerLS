@@ -20,9 +20,20 @@ package experiments;
 public class MainExperiment {
 
     public static void main(String[] args) throws Exception {
+        experimento1();
+    }
+
+    public static void experimentoEstadosIniciales() throws Exception {
         System.out.println("Ejecutando experimento sobre los estados iniciales (comprueba las métricas iniciales que produce cada algoritmo de inicialización).");
         EstadosIniciales estadosIniciales = new EstadosIniciales();
         estadosIniciales.run();
         System.out.println("Experimento finalizado.\n ===========================================================");
+    }
+
+    public static void experimento1() throws Exception {
+        System.out.println("Ejecutando experimento 1 (comprueba el impacto de los distintos operadores de sucesores).");
+        Experimento1 experimento1 = new Experimento1();
+        experimento1.run();
+        System.out.println("Experimento finalizado.\n===========================================================");
     }
 }
