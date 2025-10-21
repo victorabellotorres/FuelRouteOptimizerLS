@@ -9,7 +9,9 @@ import java.util.*;
 public class P1SuccessorFunction implements SuccessorFunction {
 
     public static boolean[] operatorsEnabled = {
-            true,   // swapPosicionPeticion
+
+            true,    // swapPeticiones
+            false,    // movePeticionToPosition + removePeticion
             true,   // swapViajes
             true    // swapCamiones
     };
@@ -17,12 +19,15 @@ public class P1SuccessorFunction implements SuccessorFunction {
     @Override
     public List getSuccessors(Object o) {
         P1Board actual = (P1Board) o;
-//      sucesores.addAll(successorsSwapPeticiones(actual)); // No va bien
-
         ArrayList<Successor> sucesores = new ArrayList<>();
-        if (operatorsEnabled[0]) sucesores.addAll(successorsSwapPosicionPeticion(actual));
-        if (operatorsEnabled[1]) sucesores.addAll(successorsSwapViajes(actual));
-        if (operatorsEnabled[2]) sucesores.addAll(successorsSwapCamiones(actual));
+
+        if (operatorsEnabled[0]) sucesores.addAll(successorsSwapPeticiones(actual)); // op1
+        if (operatorsEnabled[1]) { // op2
+            sucesores.addAll(successorsMovePeticionToPosition(actual));
+            sucesores.addAll(successorsRemovePeticionOnPosition(actual));
+        }
+        if (operatorsEnabled[2]) sucesores.addAll(successorsSwapViajes(actual)); // op3
+        if (operatorsEnabled[3]) sucesores.addAll(successorsSwapCamiones(actual)); // op4
         return sucesores;
     }
 
@@ -40,11 +45,58 @@ public class P1SuccessorFunction implements SuccessorFunction {
         return sucesores;
     }
 
+    private ArrayList successorsMovePeticionToPosition(P1Board actual) {
+        ArrayList<Successor> sucesores = new ArrayList<>();
+
+        for (int p = 0; p < actual.getPeticiones().length; p++) {
+            for (int c = 0; c < actual.getCamiones().length; c++) {
+                for (int v = 0; v < Camion.MAX_VIAJES; v++) {
+                    if (actual.getCamiones()[c].getViajes()[v].first == -1){
+                        P1Board nuevo = new P1Board(actual);
+                        if (nuevo.movePeticionToPosicion(c, v, true, p)) {
+                            sucesores.add(new Successor("movePeticionToPosition(Peticion:" + p + ", Camion:" + c + ", Viaje:" + v + ", first)", nuevo));
+                        }
+                    }
+                    if (actual.getCamiones()[c].getViajes()[v].second == -1) {
+                        P1Board nuevo = new P1Board(actual);
+                        if (nuevo.movePeticionToPosicion(c, v, false, p)) {
+                            sucesores.add(new Successor("movePeticionToPosition(Peticion:" + p + ", Camion:" + c + ", Viaje:" + v + ", second)", nuevo));
+                        }
+                    }
+                }
+            }
+        }
+        return sucesores;
+    }
+
+    private ArrayList successorsRemovePeticionOnPosition(P1Board actual) {
+        ArrayList<Successor> sucesores = new ArrayList<>();
+
+
+        for (int c = 0; c < actual.getCamiones().length; c++) {
+            for (int v = 0; v < Camion.MAX_VIAJES; v++) {
+                if (actual.getCamiones()[c].getViajes()[v].first == -1){
+                    P1Board nuevo = new P1Board(actual);
+                    if (nuevo.removePeticionOnPosition(c, v, true)) {
+                        sucesores.add(new Successor("removePeticionOnPosition(Camion:" + c + ", Viaje:" + v + ", first)", nuevo));
+                    }
+                }
+                if (actual.getCamiones()[c].getViajes()[v].second == -1) {
+                    P1Board nuevo = new P1Board(actual);
+                    if (nuevo.removePeticionOnPosition(c, v, false)) {
+                        sucesores.add(new Successor("removePeticionOnPosition(Camion:" + c + ", Viaje:" + v + ", second)", nuevo));
+                    }
+                }
+            }
+        }
+        return sucesores;
+    }
+
     private ArrayList successorsSwapPosicionPeticion(P1Board actual) {
         ArrayList<Successor> sucesores = new ArrayList<>();
 
         for (int c = 0; c < actual.getCamiones().length; c++) {
-            for (int v = 0; v < Camion.MAX_KM; v++) {
+            for (int v = 0; v < Camion.MAX_VIAJES; v++) {
                     for (int p = 0; p < actual.getPeticiones().length; p++) {
                         P1Board nuevo = new P1Board(actual);
                         if (nuevo.swapPosicionPeticion(c, v, true, p)) {
@@ -96,6 +148,7 @@ public class P1SuccessorFunction implements SuccessorFunction {
         operatorsEnabled[0] = operations[0];
         operatorsEnabled[1] = operations[1];
         operatorsEnabled[2] = operations[2];
+        operatorsEnabled[3] = operations[3];
     }
 
 }

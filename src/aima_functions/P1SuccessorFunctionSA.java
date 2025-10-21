@@ -14,9 +14,9 @@ import java.util.Random;
  */
 public class P1SuccessorFunctionSA implements SuccessorFunction {
 
-    private final Random rand;
-    private final int neighborCount;
-
+    public static Random rand;
+    public static int neighborCount = 1;
+ 
     public P1SuccessorFunctionSA() {
         this(5);
     }

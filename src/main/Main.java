@@ -74,11 +74,11 @@ public class Main {
         System.out.println("Tiempo total: " + (end - start) + " ms");
 
         System.out.println("Estadísticas del estado final:");
-        imprimirEstadisticasEstado(finalState, hf);
-
         // nodos expandidos:
         System.out.println("\n-- Instrumentación --");
         printInstrumentation(agent.getInstrumentation());
+        System.out.println("===============================");
+        imprimirEstadisticasEstado(finalState, hf);
         System.out.println("===============================");
 
         System.out.println("\n-- Acciones --");
@@ -95,19 +95,27 @@ public class Main {
         P1Board estadoInicial = null;
 //        estadoInicial = InitialBoardGenerator.SolucionSinAsignaciones(gasolineras, centrosDistribucion);
         switch (Constants.ALGORITMO_ESTADO_INICIAL) {
+            case 1 -> {
+                System.out.println("Generando estado inicial SIN ASIGNACIONES...");
+                estadoInicial = InitialBoardGenerator.SolucionSinAsignaciones(gasolineras, centrosDistribucion);
+            }
             case 2 -> {
                 System.out.println("Generando estado inicial ALEATORIO...");
                 estadoInicial = InitialBoardGenerator.SolucionAsignacionAleatoria(gasolineras, centrosDistribucion);
             }
             case 3 -> {
-                System.out.println("Generando estado inicial GREEDY (QUADRANTS)...");
+                System.out.println("Generando estado inicial GREEDY (DISTANCIAS)...");
                 estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gasolineras, centrosDistribucion);
             }
             case 4 -> {
+                System.out.println("Generando estado inicial GREEDY (QUADRANTS)...");
+                estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gasolineras, centrosDistribucion);
+            }
+            case 5 -> {
                 System.out.println("Generando estado inicial GREEDY (EIXOS)...");
                 estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyEjes(gasolineras, centrosDistribucion);
             }
-            default -> {
+            case 6 -> {
                 System.out.println("Generando estado inicial ORDENADO...");
                 estadoInicial = InitialBoardGenerator.SolucionAsignacionOrdenada(gasolineras, centrosDistribucion); // placeholder
             }
@@ -162,12 +170,12 @@ public class Main {
         System.out.print("1. Máximo de viajes por camión: " + Constants.MAX_VIAJES);
         System.out.print("2. Máximo de kilómetros por camión: " + Constants.MAX_KM);
 
-            System.out.print("Selecciona el Estado Inicial [1: Por orden(default), 2: Aleatorio, 3: Greedy-Distancia, 4: Greedy-Quadrants, 5: Greedy-X]: ");
+            System.out.print("Selecciona el Estado Inicial [1: Sin assignación (default), 2: Aleatorio, 3: Greedy distancias, 4: Greedy quadrants, 5: Greedy X axis, 6: Por orden básico]: ");
         int option = 1;
         if (sc.hasNextInt()) {
             option = sc.nextInt();
             if (option < 1 || option > 5) {
-                System.out.println("Opción no válida. Usando valor por defecto (1: Por orden).");
+                System.out.println("Opción no válida. Usando valor por defecto (1: Sin assignacion).");
                 option = 1;
             }
         } else {
@@ -186,10 +194,10 @@ public class Main {
         }
         Constants.ALGORITMO_BUSQUEDA = option;
 
-    System.out.print("Selecciona la Seed: [R = random, Default: 1234]: ");
-    String input = "";
-    if (sc.hasNext()) input = sc.next();
-       if (!input.isEmpty()) {
+        System.out.print("Selecciona la Seed: [R = random, Default: 1234]: ");
+        String input = "";
+        if (sc.hasNext()) input = sc.next();
+        if (!input.isEmpty()) {
            try {
                if (input.equalsIgnoreCase("R")) {
                    Constants.SEED = (int) System.currentTimeMillis();
@@ -199,7 +207,7 @@ public class Main {
            } catch (NumberFormatException e) {
                System.out.println("Entrada no válida. Usando valor por defecto (1234).");
            }
-       }
+        }
 
         System.out.print("Selecciona el número de centros de distribución [Default = 10]: ");
         int num = Constants.NUM_CENTROSDISTRIBUCION;

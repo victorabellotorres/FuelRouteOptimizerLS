@@ -114,7 +114,8 @@ public class P1Board {
         if (idPeticion1 == idPeticion2) return false;
 
         if (idPeticion1 == -1) {
-            return movePeticionToPosicion(idCamion, idViaje, first, idPeticion2);
+            //return movePeticionToPosicion(idCamion, idViaje, first, idPeticion2);
+            return false;
         }
         else {
             return swapPeticiones(idPeticion1, idPeticion2);
@@ -132,6 +133,12 @@ public class P1Board {
 
         if (peticiones[i].getIdCamion() != -1 && peticiones[j].getIdCamion() != -1) { // Si las dos peticiones tienen un camion asignado
             if (peticiones[i].getIdCamion() == peticiones[j].getIdCamion()) { // Si son del mismo camion
+
+                // Si son del mismo viaje
+                if (peticiones[i].getIdViaje() == peticiones[j].getIdViaje()) {
+                    return false; // No tiene sentido hacer el swap
+                }
+
                 int distancia = camiones[peticiones[i].getIdCamion()].getKmUsados();
                 distancia -= getDistanciaViaje(peticiones[i].getIdCamion(), peticiones[i].getIdViaje());
                 distancia -= getDistanciaViaje(peticiones[j].getIdCamion(), peticiones[j].getIdViaje());
@@ -150,12 +157,12 @@ public class P1Board {
                 distancia += nuevaDistancia;
                 if (distancia > Camion.MAX_KM) {
                     // Deshacemos el swap
-                    camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
-                    camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(i, j);
-
-                    // Deshacemos los cambios en las peticiones
-                    peticiones[j].setIdViaje(peticiones[i].getIdViaje());
-                    peticiones[i].setIdViaje(tempIdViaje_i);
+//                    camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
+//                    camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(i, j);
+//
+//                    // Deshacemos los cambios en las peticiones
+//                    peticiones[j].setIdViaje(peticiones[i].getIdViaje());
+//                    peticiones[i].setIdViaje(tempIdViaje_i);
 
                     return false;
                 }
@@ -189,15 +196,15 @@ public class P1Board {
 
                 if (distancia1 > Camion.MAX_KM || distancia2 > Camion.MAX_KM) {
                     // Deshacemos el swap
-                    camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
-                    camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(i, j);
-
-                    // Deshacemos los cambios en las peticiones
-                    peticiones[j].setIdCamion(peticiones[i].getIdCamion());
-                    peticiones[i].setIdCamion(tempIdCamion_i);
-
-                    peticiones[j].setIdViaje(peticiones[i].getIdViaje());
-                    peticiones[i].setIdViaje(tempIdViaje_i);
+//                    camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
+//                    camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(i, j);
+//
+//                    // Deshacemos los cambios en las peticiones
+//                    peticiones[j].setIdCamion(peticiones[i].getIdCamion());
+//                    peticiones[i].setIdCamion(tempIdCamion_i);
+//
+//                    peticiones[j].setIdViaje(peticiones[i].getIdViaje());
+//                    peticiones[i].setIdViaje(tempIdViaje_i);
 
 
                     return false;
@@ -221,12 +228,12 @@ public class P1Board {
             distancia += nuevaDistancia;
             if (distancia > Camion.MAX_KM) {
                 // Deshacemos el swap
-                camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(j, i);
-
-                peticiones[i].setIdCamion(peticiones[j].getIdCamion());
-                peticiones[i].setIdViaje(peticiones[j].getIdViaje());
-                peticiones[j].setIdCamion(-1);
-                peticiones[j].setIdViaje(-1);
+//                camiones[peticiones[j].getIdCamion()].getViajes()[peticiones[j].getIdViaje()].swap(j, i);
+//
+//                peticiones[i].setIdCamion(peticiones[j].getIdCamion());
+//                peticiones[i].setIdViaje(peticiones[j].getIdViaje());
+//                peticiones[j].setIdCamion(-1);
+//                peticiones[j].setIdViaje(-1);
                 return false;
             }
             camiones[peticiones[j].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia);
@@ -246,12 +253,12 @@ public class P1Board {
             distancia += nuevaDistancia;
             if (distancia > Camion.MAX_KM) {
                 // Deshacemos el swap
-                camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(j, i);
-
-                peticiones[j].setIdCamion(peticiones[i].getIdCamion());
-                peticiones[j].setIdViaje(peticiones[i].getIdViaje());
-                peticiones[i].setIdCamion(-1);
-                peticiones[i].setIdViaje(-1);
+//                camiones[peticiones[i].getIdCamion()].getViajes()[peticiones[i].getIdViaje()].swap(i, j);
+//
+//                peticiones[j].setIdCamion(peticiones[i].getIdCamion());
+//                peticiones[j].setIdViaje(peticiones[i].getIdViaje());
+//                peticiones[i].setIdCamion(-1);
+//                peticiones[i].setIdViaje(-1);
                 return false;
             }
             camiones[peticiones[i].getIdCamion()].setKmRestantes(Camion.MAX_KM - distancia);
@@ -260,6 +267,7 @@ public class P1Board {
         return true;
     }
 
+    // mueve una peticoin a una posicion solo si la posición esta vacia == -1
     public boolean movePeticionToPosicion(int idCamion, int idViaje, boolean first, int idPeticion) {
         // Casos sin sentidos
         if (idCamion >= camiones.length || idCamion < 0) return false;
@@ -299,6 +307,42 @@ public class P1Board {
         if (first && v.second == -1) {
             camiones[idCamion].setViajesRestantes(camiones[idCamion].getViajesRestantes() - 1);
         } else if (!first && v.first == -1) {
+            camiones[idCamion].setViajesRestantes(camiones[idCamion].getViajesRestantes() - 1);
+        }
+        return true;
+    }
+
+    // Elimina la peticion en la posicion, si hay peticion
+    public boolean removePeticionOnPosition(int idCamion, int idViaje, boolean first) {
+        // Casos sin sentidos
+        if (idCamion >= camiones.length || idCamion < 0) return false;
+        if (idViaje >= Camion.MAX_VIAJES || idViaje < 0) return false;
+
+        Camion camion = camiones[idCamion];
+        Pair v = camion.getViajes()[idViaje];
+        int idPeticion;
+        if (first) idPeticion = v.first;
+        else idPeticion = v.second;
+        // Si no hay peticion return false
+        if (idPeticion == -1) return false;
+
+        // Calculamos la nueva distancia del camión si se añade la petición
+        int distanciaActual = getDistanciaViaje(idCamion, idViaje);
+
+        if (first) camiones[idCamion].getViajes()[idViaje].first = -1;
+        else camiones[idCamion].getViajes()[idViaje].second = -1;
+        // Actualizamos el vector de posiciones
+        peticiones[idPeticion].setIdCamion(-1);
+        peticiones[idPeticion].setIdViaje(-1);
+
+        int nuevaDistancia = getDistanciaViaje(idCamion, idViaje);
+
+        int distanciaCamion = camiones[idCamion].getKmUsados() - distanciaActual + nuevaDistancia;
+        if (distanciaCamion > Camion.MAX_KM) {
+            return false;
+        }
+        camiones[idCamion].setKmRestantes(Camion.MAX_KM - distanciaCamion);
+        if (v.isEmpty()) {
             camiones[idCamion].setViajesRestantes(camiones[idCamion].getViajesRestantes() - 1);
         }
         return true;
@@ -535,6 +579,22 @@ public class P1Board {
         return beneficio;
     }
 
+    // Sin tener en cuenta las peticiones no asignadas
+    private double getBeneficioDelDia() {
+        double beneficio = 0.0;
+        // Beneficio: peticiones atendidas hoy (solo las que tienen camion asignado)
+        for (Peticion p : peticiones) {
+            double porcentaje = 0.0;
+            // Si la peticion no tiene camion asignado, el beneficio es el que se obtiene si asumimos que se atiende un día después.
+            if (p.getIdCamion() == -1) continue;
+            else {
+                porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
+            }
+            beneficio += main.Constants.VALOR_DEPOSITO * (porcentaje / 100.0);
+        }
+        return beneficio;
+    }
+
     public double getCoste() {
         double coste = 0.0;
         // Coste: kilómetros totales recorridos
@@ -564,8 +624,10 @@ public class P1Board {
         }
         double kmMediosPorCamion = camiones.length > 0 ? (double) totalKm / camiones.length : 0.0;
 
-        return new BoardMetrics(valid, errorMsg, peticionesAssignadas, peticionesTotales, camionesUsados, camionesTotales, totalKm, kmMediosPorCamion, getBeneficio(), getCoste());
+        return new BoardMetrics(valid, errorMsg, peticionesAssignadas, peticionesTotales, camionesUsados, camionesTotales, totalKm, kmMediosPorCamion, getBeneficio(), getCoste(), getBeneficioDelDia());
     }
+
+
 
     // ==============================
     // Representación

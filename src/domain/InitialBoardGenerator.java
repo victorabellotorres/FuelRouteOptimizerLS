@@ -87,6 +87,8 @@ public class InitialBoardGenerator {
         return new P1Board(camiones, gasolinerasPos, peticiones, distanciasGasolineras, distanciasCamionesGasolineras);
     }
 
+
+
     public static P1Board SolucionAsignacionOrdenada(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
 
         // Creamos los vectores necesarios
@@ -150,8 +152,77 @@ public class InitialBoardGenerator {
 
     }
 
+    // Random initial solution: shuffle petition order and assign greedily in that order
+    public static P1Board SolucionAsignacionAleatoria(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
+        Peticion[] peticiones = crearPeticiones(gasolineras);
+        Camion[] camiones = crearCamiones(centrosDistribucion);
+        Pair[] gasolinerasPos = crearGasolineras(gasolineras);
+        int[][] distanciasGasolineras = precalcularDistanciasGasolineras(gasolinerasPos);
+        int[][] distanciasCamionesGasolineras = precalcularDistanciasCamionesGasolineras(camiones, gasolinerasPos);
+
+        int n = peticiones.length;
+        int[] order = new int[n];
+        for (int i = 0; i < n; i++) order[i] = i;
+        Random rnd = new Random();
+        for (int i = n - 1; i > 0; i--) {
+            int j = rnd.nextInt(i + 1);
+            int tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+        }
+
+        return AsignarPeticionesEnOrden(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
+    }
+
+    // Random initial solution: shuffle petition order and assign greedily in that order
+    public static P1Board SolucionAsignacionAleatoria1PeticionPorViaje(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
+        Peticion[] peticiones = crearPeticiones(gasolineras);
+        Camion[] camiones = crearCamiones(centrosDistribucion);
+        Pair[] gasolinerasPos = crearGasolineras(gasolineras);
+        int[][] distanciasGasolineras = precalcularDistanciasGasolineras(gasolinerasPos);
+        int[][] distanciasCamionesGasolineras = precalcularDistanciasCamionesGasolineras(camiones, gasolinerasPos);
+
+        int n = peticiones.length;
+        int[] order = new int[n];
+        for (int i = 0; i < n; i++) order[i] = i;
+        Random rnd = new Random();
+        for (int i = n - 1; i > 0; i--) {
+            int j = rnd.nextInt(i + 1);
+            int tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+        }
+
+        return AsignarPeticionesEnOrden1PorViaje(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
+    }
+
+
+    // Greedy by distance: sort petitions by their minimum distance to any distribution center (camion start)
+    public static P1Board SolucionAsignacionGreedyDistancia(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
+        Peticion[] peticiones = crearPeticiones(gasolineras);
+        Camion[] camiones = crearCamiones(centrosDistribucion);
+        Pair[] gasolinerasPos = crearGasolineras(gasolineras);
+        int[][] distanciasGasolineras = precalcularDistanciasGasolineras(gasolinerasPos);
+        int[][] distanciasCamionesGasolineras = precalcularDistanciasCamionesGasolineras(camiones, gasolinerasPos);
+
+        Integer[] idx = new Integer[peticiones.length];
+        for (int i = 0; i < idx.length; i++) idx[i] = i;
+        Arrays.sort(idx, (a, b) -> {
+            int mina = Integer.MAX_VALUE;
+            int minb = Integer.MAX_VALUE;
+            for (int i = 0; i < distanciasCamionesGasolineras.length; i++) {
+                mina = Math.min(mina, distanciasCamionesGasolineras[i][peticiones[a].getGasolinera()]);
+                minb = Math.min(minb, distanciasCamionesGasolineras[i][peticiones[b].getGasolinera()]);
+            }
+            return Integer.compare(mina, minb);
+        });
+
+        int[] order = new int[peticiones.length];
+        for (int i = 0; i < order.length; i++) order[i] = idx[i];
+
+        return AsignarPeticionesEnOrden(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
+    }
+
+
+    // -------------------------- Helper method to assign petitions in a given order --------------------------
     // Helper: assign petitions in the provided order using the same logic as ordenada
-    private static P1Board assignPeticionesInOrder(Peticion[] peticiones, Camion[] camiones, Pair[] gasolinerasPos, int[][] distanciasGasolineras, int[][] distanciasCamionesGasolineras, int[] order) {
+    private static P1Board AsignarPeticionesEnOrden(Peticion[] peticiones, Camion[] camiones, Pair[] gasolinerasPos, int[][] distanciasGasolineras, int[][] distanciasCamionesGasolineras, int[] order) {
         int pIndex = 0;
         while (pIndex < order.length) {
             int petIdx = order[pIndex];
@@ -211,25 +282,57 @@ public class InitialBoardGenerator {
         return new P1Board(camiones, gasolinerasPos, peticiones, distanciasGasolineras, distanciasCamionesGasolineras);
     }
 
-    // Random initial solution: shuffle petition order and assign greedily in that order
-    public static P1Board SolucionAsignacionAleatoria(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
-        Peticion[] peticiones = crearPeticiones(gasolineras);
-        Camion[] camiones = crearCamiones(centrosDistribucion);
-        Pair[] gasolinerasPos = crearGasolineras(gasolineras);
-        int[][] distanciasGasolineras = precalcularDistanciasGasolineras(gasolinerasPos);
-        int[][] distanciasCamionesGasolineras = precalcularDistanciasCamionesGasolineras(camiones, gasolinerasPos);
+    // Helper: assign petitions in the provided order using the same logic as ordenada
+    private static P1Board AsignarPeticionesEnOrden1PorViaje(Peticion[] peticiones, Camion[] camiones, Pair[] gasolinerasPos, int[][] distanciasGasolineras, int[][] distanciasCamionesGasolineras, int[] order) {
+        int pIndex = 0;
+        while (pIndex < order.length) {
+            int petIdx = order[pIndex];
+            // defensive check: ensure petition index is valid
+            if (petIdx < 0 || petIdx >= peticiones.length) {
+                System.err.println("[WARN] Ignoring invalid petition index in order: " + petIdx + " (peticiones.length=" + peticiones.length + ")");
+                ++pIndex;
+                continue;
+            }
+            for (int i = 0; i < camiones.length; i++) {
+                Camion camion = camiones[i];
+                boolean assignada = false;
+                if (camion.getKmRestantes() > 0 && camion.getViajesRestantes() > 0) {
+                    for (int j = 0; j < camion.getViajes().length; j++) {
+                        Pair v = camion.getViajes()[j];
 
-        int n = peticiones.length;
-        int[] order = new int[n];
-        for (int i = 0; i < n; i++) order[i] = i;
-        Random rnd = new Random();
-        for (int i = n - 1; i > 0; i--) {
-            int j = rnd.nextInt(i + 1);
-            int tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+                        if (v.first == -1) {
+                            int gasId = peticiones[petIdx].getGasolinera();
+                            // pre-access gasolineraId = " + gasId + " (debug removed)
+                            int distancia = distanciasCamionesGasolineras[i][gasId] * 2; // ida y vuelta
+                            if (distancia > camion.getKmRestantes()) {
+                                continue;
+                            }
+                            camion.setKmRestantes(camion.getKmRestantes() - distancia);
+                            camion.setViajesRestantes(camion.getViajesRestantes() - 1);
+                            v.first = petIdx;
+
+                            peticiones[petIdx].setIdCamion(i);
+                            peticiones[petIdx].setIdViaje(j);
+
+                            assignada = true;
+                            break;
+                        }
+                    }
+                }
+                if (assignada) break;
+            }
+            ++pIndex;
         }
 
-        return assignPeticionesInOrder(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
+        return new P1Board(camiones, gasolinerasPos, peticiones, distanciasGasolineras, distanciasCamionesGasolineras);
     }
+
+
+    // =============================================
+    // Otros algoritmos de inicialización que no se utilizan
+    // =============================================
+
+
 
     // Greedy by axes (eixos): sort petitions by X coordinate (then Y) and assign in that order
     public static P1Board SolucionAsignacionGreedyEjes(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
@@ -264,33 +367,7 @@ public class InitialBoardGenerator {
         }
     // Order bounds computed: min=" + min + ", max=" + max + " (no verbose output)
 
-        return assignPeticionesInOrder(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
-    }
-
-    // Greedy by distance: sort petitions by their minimum distance to any distribution center (camion start)
-    public static P1Board SolucionAsignacionGreedyDistancia(Gasolineras gasolineras, CentrosDistribucion centrosDistribucion) {
-        Peticion[] peticiones = crearPeticiones(gasolineras);
-        Camion[] camiones = crearCamiones(centrosDistribucion);
-        Pair[] gasolinerasPos = crearGasolineras(gasolineras);
-        int[][] distanciasGasolineras = precalcularDistanciasGasolineras(gasolinerasPos);
-        int[][] distanciasCamionesGasolineras = precalcularDistanciasCamionesGasolineras(camiones, gasolinerasPos);
-
-        Integer[] idx = new Integer[peticiones.length];
-        for (int i = 0; i < idx.length; i++) idx[i] = i;
-        Arrays.sort(idx, (a, b) -> {
-            int mina = Integer.MAX_VALUE;
-            int minb = Integer.MAX_VALUE;
-            for (int i = 0; i < distanciasCamionesGasolineras.length; i++) {
-                mina = Math.min(mina, distanciasCamionesGasolineras[i][peticiones[a].getGasolinera()]);
-                minb = Math.min(minb, distanciasCamionesGasolineras[i][peticiones[b].getGasolinera()]);
-            }
-            return Integer.compare(mina, minb);
-        });
-
-        int[] order = new int[peticiones.length];
-        for (int i = 0; i < order.length; i++) order[i] = idx[i];
-
-        return assignPeticionesInOrder(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
+        return AsignarPeticionesEnOrden(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
     }
 
     // Greedy by quadrants: split petitions into 4 quadrants around center and assign quadrant by quadrant
@@ -342,7 +419,7 @@ public class InitialBoardGenerator {
         for (int v : q3) order[idx++] = v;
         for (int v : q4) order[idx++] = v;
 
-        return assignPeticionesInOrder(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
+        return AsignarPeticionesEnOrden(peticiones, camiones, gasolinerasPos, distanciasGasolineras, distanciasCamionesGasolineras, order);
     }
 
 
