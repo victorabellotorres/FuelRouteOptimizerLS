@@ -6,8 +6,8 @@ import seaborn as sns
 import numpy as np
 
 # Header del CSV
-# iteration,seed,time_ms,algorithmEI,op1,op2,op3,op4,nodesExpanded,validInicial,validFinal,heurFunction,heurIni,heurFi,costIni,costFi,dailyProfitIni
-# dailyProfitFi,profitIni,profitFi,AssignedPetitionsIni,AssignedPetitionsFi,trucksUsedIni,trucksUsedFi,totalKmIni,totalKmFi
+# iteration,seed,time_ms,algorithmEI,op1,op2,op3,op4,nodesExpanded,validInicial,validFinal,heurFunction,heurIni,heurFi,costIni,costFi,
+# profitIni,profitFi,AssignedPetitionsIni,AssignedPetitionsFi,trucksUsedIni,trucksUsedFi,totalKmIni,totalKmFi
 
 
 # === 1. Cargar el CSV ===
@@ -16,7 +16,7 @@ import numpy as np
 outdir = Path("plots/experimento_1")
 outdir.mkdir(parents=True, exist_ok=True)
 
-df = pd.read_csv("../data/experimento1_10_100.csv")
+df = pd.read_csv("../data/experimento1.csv")
 # Asegúrate de que las columnas numéricas están en el tipo correcto
 cols_numericas = ["time_ms", "nodesExpanded", "heurIni", "heurFi", "costIni", "costFi", "profitIni", "profitFi", "AssignedPetitionsIni", "AssignedPetitionsFi", "trucksUsedIni", "trucksUsedFi", "totalKmIni", "totalKmFi"]
 df[cols_numericas] = df[cols_numericas].apply(pd.to_numeric, errors="coerce")
@@ -42,13 +42,13 @@ df["qualityFi"] = df["profitFi"] - df["costFi"]
 df["qualityIni"] = df["profitIni"] - df["costIni"]
 cols = [
     "time_ms","nodesExpanded","heurIni","heurFi","costIni","costFi",
-    "profitIni","profitFi","dailyProfitIni","dailyProfitFi",
+    "profitIni","profitFi",
     "qualityIni","qualityFi","AssignedPetitionsIni","AssignedPetitionsFi",
     "trucksUsedFi","totalKmFi"
 ]
 
 # Visualizar el beneficio final medio por operación y heurística en un heatmap
-metrics = ["qualityFi", "costFi", "dailyProfitFi", "profitFi", "nodesExpanded", "time_ms", "AssignedPetitionsFi"]
+metrics = ["qualityFi", "costFi", "profitFi", "nodesExpanded", "time_ms", "AssignedPetitionsFi"]
 
 for metric in metrics:
     tabla = (df.pivot_table(index="operations",
@@ -67,7 +67,7 @@ for metric in metrics:
     plt.savefig(outdir / f"heatmap_{metric}.png", dpi=300)
 
 # Visualizar el beneficio final medio por operación y heurística en un gráfico de barras agrupadas
-metrics = ["qualityFi", "costFi", "dailyProfitFi", "profitFi", "nodesExpanded", "time_ms", "AssignedPetitionsFi"]
+metrics = ["qualityFi", "costFi", "profitFi", "nodesExpanded", "time_ms", "AssignedPetitionsFi"]
 
 for metric in metrics:
     g = (df.groupby(["operations","heurFunction"])[metric]
@@ -111,6 +111,65 @@ plt.title("Distribución del incremento en calidad final por combinación de ope
 plt.ylabel("Incremento en calidad final (qualityFi - qualityIni)")
 plt.tight_layout()
 plt.savefig(outdir / "boxplot_quality_increment_heurBasica.png", dpi=300)
+
+
+# Variabilidad del incremento en peticiones assignadas por combinacion de operaciones, con subplot
+#Con heurFunction "Avanzada"
+dftemp = df[df["heurFunction"] == "Avanzada"].copy()
+dftemp["AssignedPetitionsIncrement"] = dftemp["AssignedPetitionsFi"] - dftemp["AssignedPetitionsIni"]
+plt.figure(figsize=(10,6))
+sns.boxplot(data=dftemp, x="operations", y="AssignedPetitionsIncrement", palette="Set3")
+plt.title("Distribución del incremento en peticiones asignadas por combinación de operaciones")
+plt.ylabel("Incremento en peticiones asignadas (AssignedPetitionsFi - AssignedPetitionsIni)")
+plt.tight_layout()
+plt.savefig(outdir / "boxplot_petitions_increment_heurAvanzada.png", dpi=300)
+
+#Con heurFunction "Basica"
+dftemp = df[df["heurFunction"] == "Basica"].copy()
+dftemp["AssignedPetitionsIncrement"] = dftemp["AssignedPetitionsFi"] - dftemp["AssignedPetitionsIni"]
+plt.figure(figsize=(10,6))
+sns.boxplot(data=dftemp, x="operations", y="AssignedPetitionsIncrement", palette="Set3")
+plt.title("Distribución del incremento en peticiones asignadas por combinación de operaciones")
+plt.ylabel("Incremento en peticiones asignadas (AssignedPetitionsFi - AssignedPetitionsIni)")
+plt.tight_layout()
+plt.savefig(outdir / "boxplot_petitions_increment_heurBasica.png", dpi=300)
+
+#Subplot de la graficas anteriores de incremento en peticiones
+
+# Orden consistente de operaciones en ambos paneles
+order_ops = df["operations"].unique().tolist()
+
+fig, axes = plt.subplots(1, 2, figsize=(16, 6), sharey=True, constrained_layout=True)
+
+for ax, heur, slug in [
+    (axes[0], "Avanzada", "heurAvanzada"),
+    (axes[1], "Basica",   "heurBasica"),
+]:
+    dft = df[df["heurFunction"] == heur].copy()
+    dft["AssignedPetitionsIncrement"] = (
+            dft["AssignedPetitionsFi"] - dft["AssignedPetitionsIni"]
+    )
+
+    sns.boxplot(
+        data=dft, x="operations", y="AssignedPetitionsIncrement",
+        palette="Set3", order=order_ops, ax=ax, showfliers=True
+    )
+    # (Opcional) puntos individuales encima
+    # sns.stripplot(data=dft, x="operations", y="AssignedPetitionsIncrement",
+    #               order=order_ops, size=3, alpha=0.35, color="k", ax=ax)
+
+    ax.set_title(f"Heurística {heur}")
+    ax.set_xlabel("operations")
+    ax.tick_params(axis="x", rotation=20)
+
+# Etiquetas generales
+axes[0].set_ylabel("Incremento en peticiones asignadas (Fi − Ini)")
+axes[1].set_ylabel("")
+
+fig.suptitle("Distribución del incremento en peticiones asignadas por combinación de operadores", y=1.02)
+
+# Guardar combinado
+fig.savefig(outdir / "boxplot_petitions_increment_both.png", dpi=300, bbox_inches="tight")
 
 
 

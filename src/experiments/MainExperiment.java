@@ -19,6 +19,8 @@ public class MainExperiment {
         System.out.println("Selecciona el experimento a ejecutar:");
         System.out.println("0*  Experimento Estados iniciales - Compara los estados iniciales sin aplicar ningún algoritmo.");
         System.out.println("1️  Experimento 1 - Operadores de sucesores y funcion heurística");
+        System.out.println("2️  Experimento 2 - Estados iniciales con Hill Climbing");
+        System.out.println("3 ️ Experimento 3 - Simulated Annealing parámetros");
 
         System.out.println("-1 Todos los experimentos");
         System.out.print("Opción [1/2]: ");
@@ -46,6 +48,12 @@ public class MainExperiment {
                 Experimento2 exp2 = new Experimento2();
                 exp2.run(SEEDS);
                 System.out.println("\n✅ Experimento 2 completado.");
+            }
+            case 3 -> {
+                System.out.println("\nEjecutando Experimento 3...");
+                Experimento3 exp3 = new Experimento3();
+                exp3.run(SEEDS);
+                System.out.println("\n✅ Experimento 3 completado.");
             }
             case -1 -> {
                 System.out.println("\nEjecutando Experimento 1...");

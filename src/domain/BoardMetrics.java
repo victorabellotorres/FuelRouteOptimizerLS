@@ -12,9 +12,8 @@ public final class BoardMetrics {
     private final double beneficio;
     private final double coste;
     private final double calidad;
-    private final double beneficioDelDia;
 
-    public BoardMetrics(boolean valid, String errorMessage, int peticionesAsignadas, int peticionesTotales, int camionesUsados, int camionesTotales, int totalKm, double kmMedioCamion, double beneficio, double coste, double beneficioDelDia) {
+    public BoardMetrics(boolean valid, String errorMessage, int peticionesAsignadas, int peticionesTotales, int camionesUsados, int camionesTotales, int totalKm, double kmMedioCamion, double beneficio, double coste) {
         this.valid = valid;
         this.errorMessage = errorMessage;
         this.peticionesAsignadas = peticionesAsignadas;
@@ -26,7 +25,6 @@ public final class BoardMetrics {
         this.beneficio = beneficio;
         this.coste = coste;
         this.calidad = beneficio-coste;
-        this.beneficioDelDia = beneficioDelDia;
     }
 
     public boolean isValid() { return valid; }
@@ -40,7 +38,6 @@ public final class BoardMetrics {
     public double getBeneficio() { return beneficio; }
     public double getCoste() { return coste; }
     public double getCalidad() { return calidad; }
-    public double getBeneficioDelDia() { return beneficioDelDia; }
 
     @Override
     public String toString() {
@@ -56,7 +53,6 @@ public final class BoardMetrics {
                 ", beneficio=" + beneficio +
                 ", coste=" + coste +
                 ", calidad=" + calidad +
-                ", beneficioDelDia=" + beneficioDelDia +
                 '}';
     }
 }

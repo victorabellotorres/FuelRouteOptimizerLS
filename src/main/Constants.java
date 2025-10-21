@@ -18,8 +18,7 @@ public final class Constants {
     public static int CAMIONES_POR_CENTRO = 1;
 
     // Simulated annealing parameters
-    public static int SA_NEIGHBORS = 4;
-    public static int SA_STEPS = 10000;
+    public static int SA_STEPS = 20000;
     public static int SA_STITER = 1;
     public static int SA_K = 1;
     public static double SA_LAMBDA = 0.001;

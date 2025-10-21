@@ -1,5 +1,6 @@
 package experiments;
 
+import aima.search.informed.SimulatedAnnealingSearch;
 import domain.*;
 import aima_functions.*;
 import IA.Gasolina.*;
@@ -18,7 +19,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 
-public class Experimento2 {
+public class Experimento3 {
 
     // 🔹 Reducimos repeticiones para probar más rápido
 //    public static final int ITERACIONES = 10; // Viene definida por SEEDS
@@ -27,11 +28,22 @@ public class Experimento2 {
     public static final int NUM_GASOLINERAS = 100;
     public static final int NUM_CAMIONES_POR_CENTRO = 1;
     public static final String HEURISTICA = "Avanzada"; // "Basica" o "Avanzada"
-    public static final String[] ALGORITMOS_ESTADO_INICIAL = {
-            "Sin_Assignacion", "Aleatorio", "Aleatorio_1PxV", "GreedyDistancia"
-    };
+    public static final String ALGORITMO_ESTADO_INICIAL = "Aleatorio";//  "Sin_Assignacion", "Aleatorio", "Aleatorio_1PxV", "GreedyDistancia"
     public static boolean[] OPERATORS = {true, true, true, true};
-    private static final String OUTPUT_FILE = "data/experimento2.csv";
+    private static final String OUTPUT_FILE = "data/experimento3.csv";
+
+    // Simulated Annealing parameters
+    // Simulated annealing parameters
+    public static int SA_STEPS = 20000;
+    public static int[] SA_STITER = {
+            1
+    };
+    public static int[] SA_K = {
+            1
+    };
+    public static double[] SA_LAMBDA = {
+            0.001
+    };
 
     public void run(int[] SEEDS) throws Exception {
         File file = new File(OUTPUT_FILE);
@@ -51,37 +63,36 @@ public class Experimento2 {
             CentrosDistribucion centrosDistribucion = new CentrosDistribucion(NUM_CENTROS_DISTRIBUCION, NUM_CAMIONES_POR_CENTRO, SEED);
 
 
-            System.out.println("Generando estados iniciales...");
+            System.out.println("Generando estado inicial...");
             System.out.println("===========================================================");
+            P1Board estadoInicial = null;
+            switch (ALGORITMO_ESTADO_INICIAL) {
+                case "Sin_Assignacion" -> {
+                    estadoInicial = InitialBoardGenerator.SolucionSinAsignaciones(gasolineras, centrosDistribucion);
+                }
+                case "Aleatorio" -> {
+                    estadoInicial = InitialBoardGenerator.SolucionAsignacionAleatoria(gasolineras, centrosDistribucion);
+                }
+                case "Aleatorio_1PxV" -> {
+                    estadoInicial = InitialBoardGenerator.SolucionAsignacionAleatoria1PeticionPorViaje(gasolineras, centrosDistribucion);
+                }
+                case "GreedyDistancia" -> {
+                    estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyDistancia(gasolineras, centrosDistribucion);
+                }
+                // Añadir más casos si se quiere
+            }
 
             // Definir funciones
-            SuccessorFunction sf = new P1SuccessorFunction();
-            Search search = new HillClimbingSearch();
+            SuccessorFunction sf = new P1SuccessorFunctionSA();
             HeuristicFunction hf = HEURISTICA.equals("Avanzada") ? new P1HeuristicFunction() : new P1HeuristicFunctionBasica();
 
 
-            for (int e = 0; e < ALGORITMOS_ESTADO_INICIAL.length; e++) {
+            for (int e = 0; e < SA_LAMBDA.length; e++) {
                 P1SuccessorFunction.operatorsEnabled = OPERATORS;
+                Search search = new SimulatedAnnealingSearch(SA_STEPS, SA_STITER[e], SA_K[e], SA_LAMBDA[e]);
 
-                String algoritmoEstadoIni = ALGORITMOS_ESTADO_INICIAL[e];
-                int iteraciones_aleatorio = Objects.equals(algoritmoEstadoIni, "Aleatorio") || Objects.equals(algoritmoEstadoIni, "Aleatorio_1PxV") ? ITERACIONES_ALEATORIO : 1;
+                int iteraciones_aleatorio = Objects.equals(ALGORITMO_ESTADO_INICIAL, "Aleatorio") || Objects.equals(ALGORITMO_ESTADO_INICIAL, "Aleatorio_1PxV") ? ITERACIONES_ALEATORIO : 1;
                 for (int j = 0; j < iteraciones_aleatorio; ++j) {
-                    P1Board estadoInicial = null;
-                    switch (algoritmoEstadoIni) {
-                        case "Sin_Assignacion" -> {
-                            estadoInicial = InitialBoardGenerator.SolucionSinAsignaciones(gasolineras, centrosDistribucion);
-                        }
-                        case "Aleatorio" -> {
-                            estadoInicial = InitialBoardGenerator.SolucionAsignacionAleatoria(gasolineras, centrosDistribucion);
-                        }
-                        case "Aleatorio_1PxV" -> {
-                            estadoInicial = InitialBoardGenerator.SolucionAsignacionAleatoria1PeticionPorViaje(gasolineras, centrosDistribucion);
-                        }
-                        case "GreedyDistancia" -> {
-                            estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyDistancia(gasolineras, centrosDistribucion);
-                        }
-                        // Añadir más casos si se quiere
-                    }
                     Problem problem = new Problem(
                             estadoInicial,
                             sf,
@@ -122,7 +133,7 @@ public class Experimento2 {
                     double hInicial = hf.getHeuristicValue(estadoInicial);
                     double hFinal = hf.getHeuristicValue(estadoFinal);
 
-                    exportarDatos(estadoInicial, hInicial, estadoFinal,algoritmoEstadoIni, "HillClimbing", (i == 0 ? "Avanzada" : "Basica"), hFinal, SEED, i, nodosExpandidos, end - start, OPERATORS);
+                    exportarDatos(estadoInicial, hInicial, estadoFinal,ALGORITMO_ESTADO_INICIAL, "Simulated Annealing", (i == 0 ? "Avanzada" : "Basica"), hFinal, SEED, i, nodosExpandidos, end - start, OPERATORS);
                 }
             }
         }

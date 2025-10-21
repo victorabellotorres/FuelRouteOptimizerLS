@@ -130,7 +130,7 @@ public class Main {
         if (Constants.ALGORITMO_BUSQUEDA == 2) {
             System.out.println("Usando Simulated Annealing...");
             // Use SA-specific successor and conservative default parameters
-            sf = new P1SuccessorFunctionSA(Constants.SA_NEIGHBORS);
+            sf = new P1SuccessorFunctionSA();
             // iterations, stepsPerTemp, k, lambda
             // Increase iterations to allow up to ~20001 node expansions
             search = new SimulatedAnnealingSearch(Constants.SA_STEPS, Constants.SA_STITER, Constants.SA_K, Constants.SA_LAMBDA);

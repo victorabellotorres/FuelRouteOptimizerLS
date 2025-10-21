@@ -355,10 +355,11 @@ public class P1Board {
         if (idCamion2 >= camiones.length || idCamion2 < 0) return false;
         if (idViaje2 >= Camion.MAX_VIAJES || idViaje2 < 0) return false;
 
-        if (idCamion1 == idCamion2) return false;
-
         Pair viaje1 = camiones[idCamion1].getViajes()[idViaje1];
         Pair viaje2 = camiones[idCamion2].getViajes()[idViaje2];
+        if (viaje1.isEmpty() && viaje2.isEmpty()) return false; // Si los dos viajes estan vacios no tiene sentido hacer el swap
+
+        if (idCamion1 == idCamion2) return false;
 
         int distanciaViaje1before = getDistanciaViaje(idCamion1, idViaje1);
         int distanciaViaje2before = getDistanciaViaje(idCamion2, idViaje2);
@@ -564,23 +565,8 @@ public class P1Board {
         return beneficio-coste;
     }
 
-    public double getBeneficio() {
-        double beneficio = 0.0;
-        // Beneficio: peticiones atendidas hoy (solo las que tienen camion asignado)
-        for (Peticion p : peticiones) {
-            double porcentaje = 0.0;
-            // Si la peticion no tiene camion asignado, el beneficio es el que se obtiene si asumimos que se atiende un día después.
-            if (p.getIdCamion() == -1) porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias()+1)));
-            else {
-                porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
-            }
-            beneficio += main.Constants.VALOR_DEPOSITO * (porcentaje / 100.0);
-        }
-        return beneficio;
-    }
-
     // Sin tener en cuenta las peticiones no asignadas
-    private double getBeneficioDelDia() {
+    public double getBeneficio() {
         double beneficio = 0.0;
         // Beneficio: peticiones atendidas hoy (solo las que tienen camion asignado)
         for (Peticion p : peticiones) {
@@ -624,7 +610,7 @@ public class P1Board {
         }
         double kmMediosPorCamion = camiones.length > 0 ? (double) totalKm / camiones.length : 0.0;
 
-        return new BoardMetrics(valid, errorMsg, peticionesAssignadas, peticionesTotales, camionesUsados, camionesTotales, totalKm, kmMediosPorCamion, getBeneficio(), getCoste(), getBeneficioDelDia());
+        return new BoardMetrics(valid, errorMsg, peticionesAssignadas, peticionesTotales, camionesUsados, camionesTotales, totalKm, kmMediosPorCamion, getBeneficio(), getCoste());
     }
 
 

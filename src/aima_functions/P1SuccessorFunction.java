@@ -11,7 +11,7 @@ public class P1SuccessorFunction implements SuccessorFunction {
     public static boolean[] operatorsEnabled = {
 
             true,    // swapPeticiones
-            false,    // movePeticionToPosition + removePeticion
+            true,    // movePeticionToPosition + removePeticion
             true,   // swapViajes
             true    // swapCamiones
     };

@@ -89,7 +89,7 @@ public class EstadosIniciales {
 
                 File file = new File("data/estados_iniciales.csv");
                 boolean writeHeader = !file.exists() || file.length() == 0;
-                String header = "algoritmo,seed,iteration,valid,hfAvanzadaValue,hfBasicaValue,peticionesAsignadas,peticionesTotales,camionesUsados,camionesTotales,totalKm,kmMedioCamion,beneficioDelDia,beneficio,coste,calidad,errorMessage\n";
+                String header = "algoritmo,seed,iteration,valid,hfAvanzadaValue,hfBasicaValue,peticionesAsignadas,peticionesTotales,camionesUsados,camionesTotales,totalKm,kmMedioCamion,beneficio,coste,calidad,errorMessage\n";
 
                 try (Writer out = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8)) {
                         if (writeHeader) {
@@ -109,7 +109,6 @@ public class EstadosIniciales {
                                         metrics.getCamionesTotales(),
                                         metrics.getTotalKm(),
                                         metrics.getKmMedioCamion(),
-                                        metrics.getBeneficioDelDia(),
                                         metrics.getBeneficio(),
                                         metrics.getCoste(),
                                         metrics.getCalidad(),

@@ -6,7 +6,7 @@ import seaborn as sns
 import numpy as np
 
 #Header csv: algoritmo,seed,iteration,valid,hfAvanzadaValue,hfBasicaValue,peticionesAsignadas,peticionesTotales,
-# camionesUsados,camionesTotales,totalKm,kmMedioCamion,beneficioDelDia,beneficio,coste,calidad,errorMessage
+# camionesUsados,camionesTotales,totalKm,kmMedioCamion,beneficio,coste,calidad,errorMessage
 
 
 # === 1. Cargar el CSV ===
@@ -17,7 +17,7 @@ outdir = Path("plots/estados_iniciales")
 outdir.mkdir(parents=True, exist_ok=True)
 
 # Asegúrate de que las columnas numéricas están en el tipo correcto
-cols_numericas = ["hfAvanzadaValue","hfBasicaValue", "beneficioDelDia","beneficio", "coste", "calidad", "totalKm",
+cols_numericas = ["hfAvanzadaValue","hfBasicaValue", "beneficio", "coste", "calidad", "totalKm",
                   "kmMedioCamion", "peticionesAsignadas", "peticionesTotales", "camionesUsados", "camionesTotales"]
 df[cols_numericas] = df[cols_numericas].apply(pd.to_numeric, errors="coerce")
 
@@ -25,7 +25,6 @@ df[cols_numericas] = df[cols_numericas].apply(pd.to_numeric, errors="coerce")
 resumen = df.groupby("algoritmo").agg({
     "hfAvanzadaValue": "mean",
     "hfBasicaValue": "mean",
-    "beneficioDelDia": "mean",
     "beneficio": "mean",
     "coste": "mean",
     "calidad": "mean",
@@ -63,10 +62,6 @@ def slug(s: str) -> str:
 
 # Especificación de los gráficos que quieres
 plots = [
-    dict(y="beneficioDelDia",
-         title="Beneficio Diario medio (No cuenta peticiones sin asignar)",
-         ylabel="Beneficio Diario medio",
-         palette="viridis"),
     dict(y="beneficio",
          title="Beneficio medio por algoritmo",
          ylabel="Beneficio medio",

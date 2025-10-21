@@ -117,20 +117,20 @@ public class Experimento1 {
                         double hInicial = hf.getHeuristicValue(estadoInicial);
                         double hFinal = hf.getHeuristicValue(estadoFinal);
 
-                        exportarDatos(estadoInicial, hInicial, estadoFinal,algoritmoEstadoIni, (h == 0 ? "Avanzada" : "Basica"), hFinal, SEED, i, nodosExpandidos, end - start, OPERATORS[op]);
+                        exportarDatos(estadoInicial, hInicial, estadoFinal,algoritmoEstadoIni,"HilllClimbing", (h == 0 ? "Avanzada" : "Basica"), hFinal, SEED, i, nodosExpandidos, end - start, OPERATORS[op]);
                     }
                 }
             }
         }
     }
 
-    private void exportarDatos(P1Board estadoInicial, double hInicial, P1Board estadoFinal, String algoritmoEstadoIni, String funcionHeuristica ,double hFinal, int seed, int iteracion, String nodosExpandidos, long timeMili, boolean[] operators) throws IOException {
+    private void exportarDatos(P1Board estadoInicial, double hInicial, P1Board estadoFinal, String algoritmoEstadoIni, String algorithmSearch, String funcionHeuristica ,double hFinal, int seed, int iteracion, String nodosExpandidos, long timeMili, boolean[] operators) throws IOException {
         BoardMetrics metricsInicial = estadoInicial.getMetrics();
         BoardMetrics metricsFinal = estadoFinal.getMetrics();
 
         File file = new File(OUTPUT_FILE);
         boolean writeHeader = !file.exists() || file.length() == 0;
-        String header = "iteration,seed,time_ms,algorithmEI,op1,op2,op3,op4,nodesExpanded,validInicial,validFinal,heurFunction,heurIni,heurFi,costIni,costFi,dailyProfitIni,dailyProfitFi,profitIni,profitFi,AssignedPetitionsIni,AssignedPetitionsFi,trucksUsedIni,trucksUsedFi,totalKmIni,totalKmFi\n";
+        String header = "iteration,seed,time_ms,algorithmEI,algorithmSearch,op1,op2,op3,op4,nodesExpanded,validInicial,validFinal,heurFunction,heurIni,heurFi,costIni,costFi,profitIni,profitFi,AssignedPetitionsIni,AssignedPetitionsFi,trucksUsedIni,trucksUsedFi,totalKmIni,totalKmFi\n";
 
         try (Writer out = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8)) {
             if (writeHeader) {
@@ -142,6 +142,7 @@ public class Experimento1 {
                         seed,
                         timeMili,
                         algoritmoEstadoIni,
+                        algorithmSearch,
                         operators[0],
                         operators[1],
                         operators[2],
@@ -154,8 +155,6 @@ public class Experimento1 {
                         hFinal,
                         metricsInicial.getCoste(),
                         metricsFinal.getCoste(),
-                        metricsInicial.getBeneficioDelDia(),
-                        metricsFinal.getBeneficioDelDia(),
                         metricsInicial.getBeneficio(),
                         metricsFinal.getBeneficio(),
                         metricsInicial.getPeticionesAssignadas(),
