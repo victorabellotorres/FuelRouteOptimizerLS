@@ -30,13 +30,16 @@ public class P1HeuristicFunction implements HeuristicFunction {
             double porcentaje;
             // Si la peticion no tiene camion asignado, el beneficio es el que se obtiene si asumimos que se atiende un día después.
             if (p.getIdCamion() == -1) {
-                porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias()+1)));
-                coste += 2 * estado.getDistanciaMediaCamiones(p.getGasolinera()) * COSTE_KM;
+                double porcentajeManana = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias()+1)));
+                double porcentajeHoy = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
+                // calculamos la diferencia
+                porcentaje = porcentajeHoy-porcentajeManana;
+                beneficio -= (VALOR_DEP * (porcentaje / 100.0));
             }
             else {
                 porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
+                beneficio += (VALOR_DEP * (porcentaje / 100.0));
             }
-            beneficio += (VALOR_DEP * (porcentaje / 100.0));
         }
 
         // Heurística (AIMA minimiza, por lo que restamos el beneficio al coste para que salga negativo)

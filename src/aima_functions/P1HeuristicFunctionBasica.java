@@ -24,7 +24,7 @@ public class P1HeuristicFunctionBasica implements HeuristicFunction {
         for (Peticion p : peticiones) {
             double porcentaje = 0.0;
             // Si la peticion no tiene camion asignado, el beneficio es el que se obtiene si asumimos que se atiende un día después.
-            if (p.getIdCamion() == -1) porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias()+1)));
+            if (p.getIdCamion() == -1) continue;
             else {
                 porcentaje = Math.max(0.0, 100.0 - Math.pow(2.0, Math.max(0, p.getDias())));
             }
