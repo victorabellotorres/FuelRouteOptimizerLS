@@ -28,11 +28,13 @@ public class Experimento1 {
     public static final boolean[][] OPERATORS = {
             // SwapPosicionPeticion, (MovePeticionToPosition + RemovePeticionOnPosition), SwapViajes, SwapCamiones
             {true, false, false, false},
-            {false, true, false, false},
-            {false, false, true, false},
-            {true, false, true, true},
-            {false, true, true, true},
             {true, true, false, false},
+            {true, false, true, true},
+            {true, true, true, false},
+            {true, true, false, true},
+            {false, true, false, true},
+            {false, true, true, false},
+            {false, true, true, true},
             {true, true, true, true}
     };
 
