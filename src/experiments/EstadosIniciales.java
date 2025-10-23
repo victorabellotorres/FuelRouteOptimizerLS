@@ -69,6 +69,12 @@ public class EstadosIniciales {
                         hf2Value = hf2.getHeuristicValue(estadoInicial);
                         exportarDatos(estadoInicial, "GREEDY_DISTANCIAS", SEED, i, hf1Value, hf2Value);
 
+                        System.out.println("Generando estado inicial GREEDY CUADRANTES...");
+                        estadoInicial = InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gasolineras, centrosDistribucion);
+                        hf1Value = hf1.getHeuristicValue(estadoInicial);
+                        hf2Value = hf2.getHeuristicValue(estadoInicial);
+                        exportarDatos(estadoInicial, "GREEDY_CUADRANTES", SEED, i, hf1Value, hf2Value);
+
 //                        System.out.println("Generando estado inicial ORDENADO...");
 //                        estadoInicial = InitialBoardGenerator.SolucionAsignacionOrdenada(gasolineras, centrosDistribucion);
 //                        exportarDatos(estadoInicial, "ORDENADO", SEED, i);

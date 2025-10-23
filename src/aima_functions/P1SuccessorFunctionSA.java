@@ -19,6 +19,13 @@ public class P1SuccessorFunctionSA implements SuccessorFunction {
 
     public static int neighborCount = 1;
 
+    // estas variables solo se usan para configurar el SA recorder y conseguir datos de cada step
+    public static String filePath = ""; // si es vacio no se graba nada
+    public static int max_iterations = 10000;
+    public static int stiter = 0;
+    public static int k = 1;
+    public static double lambda = 0.01;
+
 
 
     public static boolean[] operatorsEnabled = {
@@ -28,10 +35,29 @@ public class P1SuccessorFunctionSA implements SuccessorFunction {
             true    // swapCamiones
     };
 
+    public P1SuccessorFunctionSA() {
+        filePath = "";
+    }
+
+    public P1SuccessorFunctionSA(String filePathParam, int max_iterationsParam, int stiterParam, int kParam, double lambdaParam) {
+        filePath = filePathParam;
+        max_iterations = max_iterationsParam;
+        stiter = stiterParam;
+        k = kParam;
+        lambda = lambdaParam;
+        SARecorder.setFileAndReset(filePath);
+        SARecorder.reset();
+    }
+
 
     @Override
     public List getSuccessors(Object o) {
         P1Board actual = (P1Board) o;
+
+        if (!filePath.isEmpty()) {
+            SARecorder.record(actual, max_iterations, stiter, k, lambda);
+        }
+
         ArrayList<Successor> sucesores = new ArrayList<>();
 
         Random rand = new Random();
