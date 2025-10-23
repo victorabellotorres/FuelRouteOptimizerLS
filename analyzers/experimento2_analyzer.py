@@ -19,8 +19,6 @@ cols_numericas = [
 ]
 df[cols_numericas] = df[cols_numericas].apply(pd.to_numeric, errors="coerce")
 
-print(df["algorithmEI"].value_counts())
-
 # === 2. Métricas derivadas ===
 df["qualityFi"] = df["profitFi"] - df["costFi"]
 df["qualityIni"] = df["profitIni"] - df["costIni"]

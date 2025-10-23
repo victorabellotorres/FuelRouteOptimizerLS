@@ -5,8 +5,8 @@ import domain.*;
 
 public class P1HeuristicFunctionBasica implements HeuristicFunction {
 
-    private static final double COSTE_KM = 2.0;
-    private static final double VALOR_DEP = 1000.0;
+    public static double COSTE_KM = 2.0;
+    public static double VALOR_DEP = 1000.0;
 
     @Override
     public double getHeuristicValue(Object o) {
