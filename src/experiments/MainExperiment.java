@@ -23,7 +23,7 @@ public class MainExperiment {
         System.out.println("3 ️ Experimento 3 - Simulated Annealing parámetros");
 
         System.out.println("-1 Todos los experimentos");
-        System.out.print("Opción [1/2]: ");
+        System.out.print("Opción: ");
 
         int opcion = 1;
         if (sc.hasNextInt()) {
@@ -70,6 +70,11 @@ public class MainExperiment {
                 Experimento2 exp2 = new Experimento2();
                 exp2.run(SEEDS);
                 System.out.println("\n✅ Experimento 2 completado.");
+
+                System.out.println("\nEjecutando Experimento 3...");
+                Experimento3 exp3 = new Experimento3();
+                exp3.run(SEEDS);
+                System.out.println("\n✅ Experimento 3 completado.");
             }
             default -> {
                 System.out.println("⚠️  Opción no válida. Ejecutando Experimento 1 por defecto...");

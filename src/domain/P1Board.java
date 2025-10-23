@@ -555,16 +555,6 @@ public class P1Board {
         return suma;
     }
 
-    public double getCalidad() {
-        double beneficio = 0.0;
-        double coste = 0.0;
-
-
-
-        // Heurística (AIMA minimiza, por lo que restamos el beneficio al coste para que salga negativo)
-        return beneficio-coste;
-    }
-
     // Sin tener en cuenta las peticiones no asignadas
     public double getBeneficio() {
         double beneficio = 0.0;
