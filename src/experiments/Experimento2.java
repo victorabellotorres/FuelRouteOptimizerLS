@@ -30,7 +30,7 @@ public class Experimento2 {
     public static final String[] ALGORITMOS_ESTADO_INICIAL = {
             "Sin_Assignacion",
             "Aleatorio",
-            "GreedyQuadrantes",
+            "GreedyCuadrantes",
             "Aleatorio_1PxV",
             "GreedyDistancia"
     };
@@ -81,7 +81,7 @@ public class Experimento2 {
                         case "Sin_Assignacion" -> InitialBoardGenerator.SolucionSinAsignaciones(gasolineras, centrosDistribucion);
                         case "Aleatorio" -> InitialBoardGenerator.SolucionAsignacionAleatoria(gasolineras, centrosDistribucion);
                         case "Aleatorio_1PxV" -> InitialBoardGenerator.SolucionAsignacionAleatoria1PeticionPorViaje(gasolineras, centrosDistribucion);
-                        case "GreedyQuadrantes" -> InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gasolineras, centrosDistribucion);
+                        case "GreedyCuadrantes" -> InitialBoardGenerator.SolucionAsignacionGreedyQuadrants(gasolineras, centrosDistribucion);
                         case "GreedyDistancia" -> InitialBoardGenerator.SolucionAsignacionGreedyDistancia(gasolineras, centrosDistribucion);
                         default -> null;
                     };
