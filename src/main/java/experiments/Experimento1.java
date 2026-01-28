@@ -11,7 +11,6 @@ import IA.Gasolina.*;
 
 import org.apache.commons.csv.*;
 import org.apache.commons.io.*;
-import org.apache.commons.codec.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;

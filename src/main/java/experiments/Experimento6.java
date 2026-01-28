@@ -2,19 +2,16 @@ package experiments;
 
 import aima.search.framework.*;
 import aima.search.informed.HillClimbingSearch;
-import aima.search.informed.SimulatedAnnealingSearch;
 import aima_functions.*;
 import domain.*;
 import IA.Gasolina.*;
 
 import org.apache.commons.csv.*;
 import org.apache.commons.io.*;
-import org.apache.commons.codec.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import java.util.Random;
 
 public class Experimento6 {
 

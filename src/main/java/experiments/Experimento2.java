@@ -3,13 +3,11 @@ package experiments;
 import domain.*;
 import aima_functions.*;
 import IA.Gasolina.*;
-import main.Constants;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 import aima.search.framework.*;
 import aima.search.informed.HillClimbingSearch;

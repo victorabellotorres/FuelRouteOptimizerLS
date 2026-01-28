@@ -4,17 +4,15 @@ import aima.search.informed.SimulatedAnnealingSearch;
 import domain.*;
 import aima_functions.*;
 import IA.Gasolina.*;
-import main.Constants;
+
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
 import aima.search.framework.*;
-import aima.search.informed.HillClimbingSearch;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
